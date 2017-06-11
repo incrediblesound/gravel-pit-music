@@ -8,11 +8,11 @@ export class BinSwitch {
     this.context = ctx
     this.x = null
     this.y = null
-    this.value = 0
     this.colors = ['black', 'red']
   }
   render(){
-    this.context.fillStyle = 'black'
+    const page = this.state.steps[this.type][this.state.page]
+    this.context.fillStyle = this.colors[page[this.idx]]
     this.context.fillRect(this.x, this.y, 37, 37)
     this.context.fillStyle = COLOR
   }
@@ -21,10 +21,11 @@ export class BinSwitch {
     this.y = y
   }
   handleClick(){
+    const page = this.state.steps[this.type][this.state.page]
     this.value = (this.value+1) % 2
     this.state.toggleStep(this.idx, this.type, 2)
     this.context.clearRect(this.x, this.y, 37, 37)
-    this.context.fillStyle = this.colors[this.value]
+    this.context.fillStyle = this.colors[page[this.idx]]
     this.context.fillRect(this.x, this.y, 37, 37)
     this.context.fillStyle = COLOR
   }
@@ -38,11 +39,11 @@ export class OctaveSwitch {
     this.context = ctx
     this.x = null
     this.y = null
-    this.value = 0
     this.colors = ['black', 'red', 'blue']
   }
   render(){
-    this.context.fillStyle = 'black'
+    const page = this.state.steps[this.type][this.state.page]
+    this.context.fillStyle = this.colors[page[this.idx]]
     this.context.fillRect(this.x, this.y, 37, 37)
     this.context.fillStyle = COLOR
   }
@@ -51,10 +52,11 @@ export class OctaveSwitch {
     this.y = y
   }
   handleClick(){
-    this.value = (this.value+1) % 3
+    const page = this.state.steps[this.type][this.state.page]
+    this.value = (page[this.idx]+1) % 3
     this.state.toggleStep(this.idx, this.type, 3)
     this.context.clearRect(this.x, this.y, 37, 37)
-    this.context.fillStyle = this.colors[this.value]
+    this.context.fillStyle = this.colors[page[this.idx]]
     this.context.fillRect(this.x, this.y, 37, 37)
     this.context.fillStyle = COLOR
   }

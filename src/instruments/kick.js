@@ -20,6 +20,7 @@ export default class KickSynth {
     osc.frequency.value = 55
     blipOsc.frequency.value = 440
     osc.detune.value = tone * 100
+    blipOsc.detune.value = tone * 100
     osc.connect(gain)
     blipOsc.connect(blipGain)
     gain.connect(this.context.destination)

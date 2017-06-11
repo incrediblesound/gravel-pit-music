@@ -5,26 +5,29 @@ import Snare from './instruments/snare'
 import Hat from './instruments/hat'
 import { LOOP_LENGTH } from './constants'
 
-function makeStepArray(){
+function makeStepArray(steps){
   let arr = []
-  arr.length = 16
+  arr.length = steps
   arr.fill(0)
   return arr
 }
 
 export default class State {
   constructor(audioCtx) {
+    this.blocks = {}
+    this.moduleMap = {}
+    this.page = 0
     this.steps = {
-      key: makeStepArray(),
-      kick: makeStepArray(),
-      snare: makeStepArray(),
-      leadSynth: makeStepArray(),
-      hat: makeStepArray()
+      key: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      kick: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      snare: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      leadSynth: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      hat: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)]
     }
     this.notes = {
-      key: {},
-      kick: {},
-      leadSynth: {}
+      key: [makeStepArray(16),makeStepArray(16),makeStepArray(16),makeStepArray(16)],
+      kick: [makeStepArray(16),makeStepArray(16),makeStepArray(16),makeStepArray(16)],
+      leadSynth: [makeStepArray(16),makeStepArray(16),makeStepArray(16),makeStepArray(16)]
     }
     this.blinkers = []
     this.step = 0
@@ -37,8 +40,13 @@ export default class State {
       hat: new Hat(audioCtx)
     }
   }
+  setPage(value){
+    this.page = value
+    this.refreshScreen()
+    return value
+  }
   toggleStep(idx, type, values){
-    this.steps[type][idx] = (this.steps[type][idx] + 1) % values
+    this.steps[type][this.page][idx] = (this.steps[type][this.page][idx] + 1) % values
   }
   togglePlay(play){
     if(play){
@@ -61,9 +69,9 @@ export default class State {
       this.blinkers[this.rhythmIndex].toggle()
       if(this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle()
       Object.keys(this.steps).forEach(type => {
-        if(this.steps[type][this.rhythmIndex]){
-          const note = this.notes[type] && this.notes[type][this.rhythmIndex].noteIndex
-          this.instruments[type].play(note, this.steps[type][this.rhythmIndex])
+        if(this.steps[type][this.page][this.rhythmIndex]){
+          const note = this.notes[type] && this.notes[type][this.page][this.rhythmIndex]
+          this.instruments[type].play(note, this.steps[type][this.page][this.rhythmIndex])
         }
       })
       //Insert draw stuff here
@@ -87,5 +95,26 @@ export default class State {
   stop(){
     this.blinkers[this.previousRhythmIndex].toggle()
     window.clearInterval(this.interval)
+  }
+  initScreen(){
+    for(var i = 0; i < 1020; i += 40){
+      for(var k = 0; k < 680; k += 40){
+        const key = `${i/40}/${k/40}`
+        const module = this.moduleMap[key]
+        if(module){
+          module.setPos(i, k)
+          this.blocks[key] = module
+        }
+        if(this.blocks[key]) this.blocks[key].render()
+      }
+    }
+  }
+  refreshScreen(){
+    for(var i = 0; i < 1020; i += 40){
+      for(var k = 0; k < 680; k += 40){
+        const key = `${i/40}/${k/40}`
+        if(this.blocks[key]) this.blocks[key].render()
+      }
+    }
   }
 }

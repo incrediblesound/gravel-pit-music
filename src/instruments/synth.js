@@ -4,9 +4,13 @@ export default class KeySynth {
     this.config = {
       type: 'sawtooth'
     }
+    this.filterValue = 0
   }
   newOsc(){
     return
+  }
+  setFilter(value){
+    this.filterValue = value
   }
   getOscillators(tone, oct){
   const osc = [
@@ -45,7 +49,7 @@ export default class KeySynth {
     osc.forEach((o, i) => {
       o.start()
       if(i > 0){
-        filters[1].frequency.setTargetAtTime(4000, this.context.currentTime, 0.05);
+        filters[1].frequency.setTargetAtTime(this.filterValue*1000, this.context.currentTime, 0.05);
       }
       gain[i].gain.setTargetAtTime(0, this.context.currentTime, 0.035);
       o.stop(this.context.currentTime+0.5)
