@@ -1,6 +1,7 @@
 import KeySynth from './instruments/synth'
 import KickSynth from './instruments/kick'
 import LeadSynth from './instruments/leadSynth'
+import fmSynth from './instruments/fm'
 import Snare from './instruments/snare'
 import Hat from './instruments/hat'
 import { LOOP_LENGTH } from './constants'
@@ -22,13 +23,16 @@ export default class State {
       kick: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       snare: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       leadSynth: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      fmSynth: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       hat: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)]
     }
     this.notes = {
+      fmSynth: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       key: [makeStepArray(16),makeStepArray(16),makeStepArray(16),makeStepArray(16)],
       kick: [makeStepArray(16),makeStepArray(16),makeStepArray(16),makeStepArray(16)],
       leadSynth: [makeStepArray(16),makeStepArray(16),makeStepArray(16),makeStepArray(16)]
     }
+    this.copyBuffer = { notes: {}, steps: {} }
     this.blinkers = []
     this.step = 0
     this.context = audioCtx
@@ -36,6 +40,7 @@ export default class State {
       key: new KeySynth(audioCtx),
       kick: new KickSynth(audioCtx),
       snare: new Snare(audioCtx),
+      fmSynth: new fmSynth(audioCtx),
       leadSynth: new LeadSynth(audioCtx),
       hat: new Hat(audioCtx)
     }
@@ -58,6 +63,23 @@ export default class State {
     } else {
       this.stop()
     }
+  }
+  copyPage(){
+    Object.keys(this.steps).forEach(stepKey => {
+      this.copyBuffer.steps[stepKey] = this.steps[stepKey][this.page].slice()
+    })
+    Object.keys(this.notes).forEach(noteKey => {
+      this.copyBuffer.notes[noteKey] = this.notes[noteKey][this.page].slice()
+    })
+  }
+  pastePage(){
+    Object.keys(this.steps).forEach(stepKey => {
+      this.steps[stepKey][this.page] = this.copyBuffer.steps[stepKey].slice()
+    })
+    Object.keys(this.notes).forEach(noteKey => {
+      this.notes[noteKey][this.page] = this.copyBuffer.notes[noteKey].slice()
+    })
+    this.refreshScreen()
   }
   schedule(){
     let currentTime = this.context.currentTime

@@ -24,6 +24,8 @@ for(var i = 0; i < 16; i++){
   state.moduleMap[`${i+2}/14`] = new Note(i,'kick', state, ctx)
   state.moduleMap[`${i+2}/15`] = new BinSwitch(i,'kick', state, ctx)
 
+  state.moduleMap[`${i+2}/5`] = new Note(i,'fmSynth', state, ctx)
+  state.moduleMap[`${i+2}/6`] = new OctaveSwitch(i,'fmSynth', state, ctx)
   state.moduleMap[`${i+2}/7`] = new Note(i,'leadSynth', state, ctx)
   state.moduleMap[`${i+2}/8`] = new OctaveSwitch(i,'leadSynth', state, ctx)
   state.moduleMap[`${i+2}/9`] = new Note(i,'key', state, ctx)
@@ -39,6 +41,7 @@ state.blocks['6/16'] = new BeatMarker(ctx, 6*40, 16*40)
 state.blocks['10/16'] = new BeatMarker(ctx, 10*40, 16*40)
 state.blocks['14/16'] = new BeatMarker(ctx, 14*40, 16*40)
 /* Instrument names */
+state.blocks['0/6'] = new Word('FM', ctx, 0, 6*40)
 state.blocks['0/8'] = new Word('Lead', ctx, 0, 8*40)
 state.blocks['0/9'] = new Word('Bass', ctx, 0, 10*40)
 state.blocks['0/15'] = new Word('Kick', ctx, 0, 15*40)
@@ -67,6 +70,9 @@ state.blocks['2/0'] = pageButton
 state.blocks['3/0'] = pageButton
 state.blocks['4/0'] = pageButton
 state.blocks['5/0'] = pageButton
+
+state.blocks['7/0'] = new Word('Copy', ctx, 7*40, 0, state.copyPage.bind(state))
+state.blocks['8/0'] = new Word('Paste', ctx, 8*40, 0, state.pastePage.bind(state))
 
 canvas.onclick = (e) => {
   let x = Math.floor(e.clientX/40)
