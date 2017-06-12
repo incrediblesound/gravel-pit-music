@@ -15,9 +15,10 @@ function makeStepArray(steps){
 
 export default class State {
   constructor(audioCtx) {
+    this.isPlaying = false
+    this.page = 0
     this.blocks = {}
     this.moduleMap = {}
-    this.page = 0
     this.steps = {
       key: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       kick: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
@@ -53,8 +54,10 @@ export default class State {
   toggleStep(idx, type, values){
     this.steps[type][this.page][idx] = (this.steps[type][this.page][idx] + 1) % values
   }
-  togglePlay(play){
-    if(play){
+  togglePlay(){
+    this.isPlaying = !this.isPlaying
+    
+    if(this.isPlaying){
       this.noteTime = 0.0
       this.startTime = this.context.currentTime + 0.005
       this.rhythmIndex = 0

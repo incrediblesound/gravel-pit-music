@@ -13,7 +13,7 @@ export class BinSwitch {
   render(){
     const page = this.state.steps[this.type][this.state.page]
     this.context.fillStyle = this.colors[page[this.idx]]
-    this.context.fillRect(this.x, this.y, 37, 37)
+    this.context.fillRect(this.x, this.y, 39, 39)
     this.context.fillStyle = COLOR
   }
   setPos(x, y){
@@ -24,9 +24,9 @@ export class BinSwitch {
     const page = this.state.steps[this.type][this.state.page]
     this.value = (this.value+1) % 2
     this.state.toggleStep(this.idx, this.type, 2)
-    this.context.clearRect(this.x, this.y, 37, 37)
+    this.context.clearRect(this.x, this.y, 39, 39)
     this.context.fillStyle = this.colors[page[this.idx]]
-    this.context.fillRect(this.x, this.y, 37, 37)
+    this.context.fillRect(this.x, this.y, 39, 39)
     this.context.fillStyle = COLOR
   }
 }
@@ -44,7 +44,7 @@ export class OctaveSwitch {
   render(){
     const page = this.state.steps[this.type][this.state.page]
     this.context.fillStyle = this.colors[page[this.idx]]
-    this.context.fillRect(this.x, this.y, 37, 37)
+    this.context.fillRect(this.x, this.y, 39, 39)
     this.context.fillStyle = COLOR
   }
   setPos(x, y){
@@ -55,9 +55,9 @@ export class OctaveSwitch {
     const page = this.state.steps[this.type][this.state.page]
     this.value = (page[this.idx]+1) % 3
     this.state.toggleStep(this.idx, this.type, 3)
-    this.context.clearRect(this.x, this.y, 37, 37)
+    this.context.clearRect(this.x, this.y, 39, 39)
     this.context.fillStyle = this.colors[page[this.idx]]
-    this.context.fillRect(this.x, this.y, 37, 37)
+    this.context.fillRect(this.x, this.y, 39, 39)
     this.context.fillStyle = COLOR
   }
 }

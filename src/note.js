@@ -13,7 +13,7 @@ export default class Note {
   render(){
     this.context.fillStyle = 'black'
     this.context.fillRect(this.x, this.y, 40, 40)
-    this.context.clearRect(this.x, this.y, 39, 39)
+    this.context.clearRect(this.x+1, this.y+1, 38, 38)
     const noteIndex = this.state.notes[this.type][this.state.page][this.idx]
     this.context.fillText(this.notes[noteIndex], this.x+15, this.y+25, 15);
   }

@@ -20,15 +20,15 @@ export class PlayBtn {
     this.state = state
     this.x = x
     this.y = y
-    this.on = false
+    this.on = state.isPlaying
   }
   render(){
     this.context.fillStyle = this.on ? 'green' : 'yellow'
     this.context.fillRect(this.x, this.y, 40, 40)
   }
   handleClick(){
-    this.on = !this.on
-    this.state.togglePlay(this.on)
+    this.state.togglePlay()
+    this.on = this.state.isPlaying
     this.render()
   }
 }
@@ -86,7 +86,7 @@ export class Word {
   }
   render(){
     this.context.clearRect(this.x, this.y, 40, 40)
-    this.context.fillStyle = 'black'
+    this.context.fillStyle = 'green'
     this.context.fillText(this.word, this.x+3, this.y+25, 80);
   }
 }

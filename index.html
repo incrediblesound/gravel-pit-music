@@ -3,16 +3,35 @@
   <head>
     <meta charset="utf-8">
     <title></title>
+    <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
   </head>
   <style>
+  body {
+    font-family: 'VT323', monospace;
+  }
+  h3 {
+    margin: 5px 0px 5px 0px;
+  }
   .header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
     border-bottom: solid 1px #666;
+  }
+  .header h3 {
+    /*justify-content: flex-start;*/
+  }
+  .header a {
+    text-decoration: none;
+    color: blue;
   }
   </style>
   <body>
-    <!-- <div class="header">
-      <h3>Gravel Pit</h3>
-    </div> -->
+    <div class="header">
+      <h3>GRAVEL PIT</h3>
+      <a href="https://github.com/incrediblesound/gravel-pit-music">GITHUB</a>
+    </div>
     <canvas id="synth" height="680" width="1000"></canvas>
   </body>
   <script src="./main.bundle.js"></script>

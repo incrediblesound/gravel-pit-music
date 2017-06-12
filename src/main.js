@@ -74,13 +74,31 @@ state.blocks['5/0'] = pageButton
 state.blocks['7/0'] = new Word('Copy', ctx, 7*40, 0, state.copyPage.bind(state))
 state.blocks['8/0'] = new Word('Paste', ctx, 8*40, 0, state.pastePage.bind(state))
 
-canvas.onclick = (e) => {
-  let x = Math.floor(e.clientX/40)
-  let y = Math.floor(e.clientY/40)
+canvas.onclick = function (e) {
+  let totalOffsetX = 0;
+  let totalOffsetY = 0;
+  let canvasX = 0;
+  let canvasY = 0;
+  let currentElement = this;
+  do {
+    totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft
+    totalOffsetY += currentElement.offsetTop - currentElement.scrollTop
+  } while(currentElement = currentElement.offsetParent)
+  canvasX = e.pageX - totalOffsetX - window.scrollX;
+  canvasY = e.pageY - totalOffsetY - window.scrollY;
+
+  let x = Math.floor(canvasX/40)
+  let y = Math.floor(canvasY/40)
   const key = `${x}/${y}`
   const module = state.blocks[key]
   if(module){
     state.blocks[key].handleClick(x, y)
+  }
+}
+
+window.onkeydown = function(e){
+  if(e.code && e.code === 'Space'){
+    state.togglePlay()
   }
 }
 
