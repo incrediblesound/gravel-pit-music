@@ -129,7 +129,7 @@ var PlayBtn = exports.PlayBtn = function () {
     this.state = state;
     this.x = x;
     this.y = y;
-    this.on = false;
+    this.on = state.isPlaying;
   }
 
   _createClass(PlayBtn, [{
@@ -141,8 +141,8 @@ var PlayBtn = exports.PlayBtn = function () {
   }, {
     key: 'handleClick',
     value: function handleClick() {
-      this.on = !this.on;
-      this.state.togglePlay(this.on);
+      this.state.togglePlay();
+      this.on = this.state.isPlaying;
       this.render();
     }
   }]);
@@ -232,7 +232,7 @@ var Word = exports.Word = function () {
     key: 'render',
     value: function render() {
       this.context.clearRect(this.x, this.y, 40, 40);
-      this.context.fillStyle = 'black';
+      this.context.fillStyle = 'green';
       this.context.fillText(this.word, this.x + 3, this.y + 25, 80);
     }
   }]);
@@ -352,15 +352,15 @@ var Note = function () {
     value: function render() {
       this.context.fillStyle = 'black';
       this.context.fillRect(this.x, this.y, 40, 40);
-      this.context.clearRect(this.x, this.y, 39, 39);
-      var noteIndex = this.state.notes[this.type][this.state.page][this.idx];
+      this.context.clearRect(this.x + 1, this.y + 1, 38, 38);
+      var noteIndex = this.state.steps[this.type][this.state.page][this.idx].note;
       this.context.fillText(this.notes[noteIndex], this.x + 15, this.y + 25, 15);
     }
   }, {
     key: 'handleClick',
     value: function handleClick() {
-      var page = this.state.notes[this.type][this.state.page];
-      page[this.idx] = page[this.idx] === 11 ? 0 : page[this.idx] + 1;
+      var page = this.state.steps[this.type][this.state.page];
+      page[this.idx].note = page[this.idx].note === 11 ? 0 : page[this.idx].note + 1;
       this.render();
     }
   }]);
@@ -414,9 +414,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function makeStepArray(steps) {
-  var arr = [];
-  arr.length = steps;
-  arr.fill(0);
+  var empty = [];
+  empty.length = steps;
+  empty.fill(undefined);
+  var arr = empty.map(function (item) {
+    return { step: 0, note: 0, hold: false };
+  });
   return arr;
 }
 
@@ -424,9 +427,10 @@ var State = function () {
   function State(audioCtx) {
     _classCallCheck(this, State);
 
+    this.isPlaying = false;
+    this.page = 0;
     this.blocks = {};
     this.moduleMap = {};
-    this.page = 0;
     this.steps = {
       key: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       kick: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
@@ -434,12 +438,6 @@ var State = function () {
       leadSynth: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       fmSynth: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       hat: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)]
-    };
-    this.notes = {
-      fmSynth: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
-      key: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
-      kick: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
-      leadSynth: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)]
     };
     this.copyBuffer = { notes: {}, steps: {} };
     this.blinkers = [];
@@ -465,12 +463,14 @@ var State = function () {
   }, {
     key: 'toggleStep',
     value: function toggleStep(idx, type, values) {
-      this.steps[type][this.page][idx] = (this.steps[type][this.page][idx] + 1) % values;
+      this.steps[type][this.page][idx].step = (this.steps[type][this.page][idx].step + 1) % values;
     }
   }, {
     key: 'togglePlay',
-    value: function togglePlay(play) {
-      if (play) {
+    value: function togglePlay() {
+      this.isPlaying = !this.isPlaying;
+
+      if (this.isPlaying) {
         this.noteTime = 0.0;
         this.startTime = this.context.currentTime + 0.005;
         this.rhythmIndex = 0;
@@ -486,10 +486,9 @@ var State = function () {
       var _this = this;
 
       Object.keys(this.steps).forEach(function (stepKey) {
-        _this.copyBuffer.steps[stepKey] = _this.steps[stepKey][_this.page].slice();
-      });
-      Object.keys(this.notes).forEach(function (noteKey) {
-        _this.copyBuffer.notes[noteKey] = _this.notes[noteKey][_this.page].slice();
+        _this.copyBuffer.steps[stepKey] = _this.steps[stepKey][_this.page].slice().map(function (step) {
+          return Object.assign({}, step);
+        });
       });
     }
   }, {
@@ -499,9 +498,6 @@ var State = function () {
 
       Object.keys(this.steps).forEach(function (stepKey) {
         _this2.steps[stepKey][_this2.page] = _this2.copyBuffer.steps[stepKey].slice();
-      });
-      Object.keys(this.notes).forEach(function (noteKey) {
-        _this2.notes[noteKey][_this2.page] = _this2.copyBuffer.notes[noteKey].slice();
       });
       this.refreshScreen();
     }
@@ -519,13 +515,9 @@ var State = function () {
         this.blinkers[this.rhythmIndex].toggle();
         if (this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle();
         Object.keys(this.steps).forEach(function (type) {
-          if (_this3.steps[type][_this3.page][_this3.rhythmIndex]) {
-            var note = _this3.notes[type] && _this3.notes[type][_this3.page][_this3.rhythmIndex];
-            _this3.instruments[type].play(note, _this3.steps[type][_this3.page][_this3.rhythmIndex]);
-          }
-        }
-        //Insert draw stuff here
-        );this.advanceNote();
+          _this3.instruments[type].play(_this3.steps[type][_this3.page][_this3.rhythmIndex]);
+        });
+        this.advanceNote();
       }
       this.interval = setTimeout(function () {
         _this3.schedule();
@@ -549,6 +541,11 @@ var State = function () {
   }, {
     key: 'stop',
     value: function stop() {
+      var _this4 = this;
+
+      Object.keys(this.instruments).forEach(function (key) {
+        _this4.instruments[key].stopAll();
+      });
       this.blinkers[this.previousRhythmIndex].toggle();
       window.clearInterval(this.interval);
     }
@@ -619,8 +616,8 @@ var BinSwitch = exports.BinSwitch = function () {
     key: 'render',
     value: function render() {
       var page = this.state.steps[this.type][this.state.page];
-      this.context.fillStyle = this.colors[page[this.idx]];
-      this.context.fillRect(this.x, this.y, 37, 37);
+      this.context.fillStyle = this.colors[page[this.idx].step];
+      this.context.fillRect(this.x, this.y, 39, 39);
       this.context.fillStyle = _constants.COLOR;
     }
   }, {
@@ -635,9 +632,9 @@ var BinSwitch = exports.BinSwitch = function () {
       var page = this.state.steps[this.type][this.state.page];
       this.value = (this.value + 1) % 2;
       this.state.toggleStep(this.idx, this.type, 2);
-      this.context.clearRect(this.x, this.y, 37, 37);
-      this.context.fillStyle = this.colors[page[this.idx]];
-      this.context.fillRect(this.x, this.y, 37, 37);
+      this.context.clearRect(this.x, this.y, 39, 39);
+      this.context.fillStyle = this.colors[page[this.idx].step];
+      this.context.fillRect(this.x, this.y, 39, 39);
       this.context.fillStyle = _constants.COLOR;
     }
   }]);
@@ -662,8 +659,10 @@ var OctaveSwitch = exports.OctaveSwitch = function () {
     key: 'render',
     value: function render() {
       var page = this.state.steps[this.type][this.state.page];
-      this.context.fillStyle = this.colors[page[this.idx]];
-      this.context.fillRect(this.x, this.y, 37, 37);
+      this.context.fillStyle = this.colors[page[this.idx].step];
+      this.context.fillRect(this.x, this.y, 39, 39);
+      this.context.fillStyle = page[this.idx].hold ? 'green' : 'yellow';
+      this.context.fillRect(this.x, this.y, 10, 10);
       this.context.fillStyle = _constants.COLOR;
     }
   }, {
@@ -674,14 +673,17 @@ var OctaveSwitch = exports.OctaveSwitch = function () {
     }
   }, {
     key: 'handleClick',
-    value: function handleClick() {
+    value: function handleClick(x, y, innerX, innerY) {
+      var isHold = innerX <= 10 && innerY <= 10;
       var page = this.state.steps[this.type][this.state.page];
-      this.value = (page[this.idx] + 1) % 3;
-      this.state.toggleStep(this.idx, this.type, 3);
-      this.context.clearRect(this.x, this.y, 37, 37);
-      this.context.fillStyle = this.colors[page[this.idx]];
-      this.context.fillRect(this.x, this.y, 37, 37);
-      this.context.fillStyle = _constants.COLOR;
+      if (isHold) {
+        page[this.idx].hold = !page[this.idx].hold;
+      } else {
+        this.value = (page[this.idx].step + 1) % 3;
+        this.state.toggleStep(this.idx, this.type, 3);
+      }
+      this.context.clearRect(this.x, this.y, 39, 39);
+      this.render();
     }
   }]);
 
@@ -712,6 +714,8 @@ var fmSynth = function () {
     this.context = ctx;
     this.decay = 0;
     this.prevOsc = null;
+    this.oscillators = {};
+    this.playing = false;
     this.config = {
       type: 'square'
     };
@@ -731,6 +735,28 @@ var fmSynth = function () {
     key: 'setWave',
     value: function setWave(value) {
       this.config.type = value;
+    }
+  }, {
+    key: 'storeOscillators',
+    value: function storeOscillators(data) {
+      var _this = this;
+
+      Object.keys(data).forEach(function (key) {
+        _this.oscillators[key] = data[key];
+      });
+    }
+  }, {
+    key: 'stopAll',
+    value: function stopAll() {
+      if (!this.oscillators.osc1) return;
+      this.oscillators.gainNode1.gain.setTargetAtTime(0, this.context.currentTime + this.decay * 0.02, 0.05);
+      this.oscillators.gainNode2.gain.setTargetAtTime(0, this.context.currentTime + this.decay * 0.02, 0.05);
+      this.oscillators.osc1.stop(this.context.currentTime + 1);
+      this.oscillators.osc2.stop(this.context.currentTime + 1);
+      this.oscillators.modulator1.stop(this.context.currentTime + 1);
+      this.oscillators.modulator2.stop(this.context.currentTime + 1);
+      this.oscillators = {};
+      this.playing = false;
     }
   }, {
     key: 'getModulator',
@@ -780,71 +806,63 @@ var fmSynth = function () {
           filter2 = _getOscillator4[1],
           gainNode2 = _getOscillator4[2];
 
-      var _getModulator = this.getModulator(220, 'sine', 25),
+      var _getModulator = this.getModulator(110, 'sawtooth', 40),
           _getModulator2 = _slicedToArray(_getModulator, 2),
           modulator1 = _getModulator2[0],
           modulatorGain1 = _getModulator2[1];
 
-      var _getModulator3 = this.getModulator(110, 'sawtooth', 20),
+      var _getModulator3 = this.getModulator(220, 'square', 35),
           _getModulator4 = _slicedToArray(_getModulator3, 2),
           modulator2 = _getModulator4[0],
           modulatorGain2 = _getModulator4[1];
 
-      var _getModulator5 = this.getModulator(55, 'sawtooth', 25),
-          _getModulator6 = _slicedToArray(_getModulator5, 2),
-          modulator3 = _getModulator6[0],
-          modulatorGain3 = _getModulator6[1];
-
-      var _getModulator7 = this.getModulator(220, 'square', 30),
-          _getModulator8 = _slicedToArray(_getModulator7, 2),
-          modulator4 = _getModulator8[0],
-          modulatorGain4 = _getModulator8[1];
-
-      modulatorGain1.connect(modulator2.frequency);
-      modulatorGain2.connect(osc1.frequency);
-      modulatorGain3.connect(modulator4.frequency);
-      modulatorGain4.connect(osc2.frequency);
-      return [osc1, osc2, gainNode1, gainNode2, modulator1, modulator2, modulator3, modulator4, filter1, filter2];
+      modulatorGain1.connect(osc1.frequency);
+      modulatorGain2.connect(osc2.frequency);
+      return [osc1, osc2, gainNode1, gainNode2, modulator1, modulator2, filter1, filter2];
     }
   }, {
     key: 'play',
-    value: function play(tone, oct) {
-      var _setupOscillators = this.setupOscillators(tone, oct),
-          _setupOscillators2 = _slicedToArray(_setupOscillators, 10),
-          osc1 = _setupOscillators2[0],
-          osc2 = _setupOscillators2[1],
-          gainNode1 = _setupOscillators2[2],
-          gainNode2 = _setupOscillators2[3],
-          modulator1 = _setupOscillators2[4],
-          modulator2 = _setupOscillators2[5],
-          modulator3 = _setupOscillators2[6],
-          modulator4 = _setupOscillators2[7],
-          filter1 = _setupOscillators2[8],
-          filter2 = _setupOscillators2[9];
+    value: function play(_ref) {
+      var step = _ref.step,
+          note = _ref.note,
+          hold = _ref.hold;
 
-      modulator1.start();
-      modulator2.start();
-      modulator3.start();
-      modulator4.start();
-      osc1.start();
-      osc2.start();
+      if (step && !hold) {
+        this.stopAll();
 
-      osc1.detune.value = tone * 102;
-      osc1.frequency.value = oct * 220;
-      filter1.frequency.setTargetAtTime(5000, this.context.currentTime, 0.03);
-      gainNode1.gain.setTargetAtTime(0, this.context.currentTime + 0.1 + this.decay * 0.02, 0.05);
+        var _setupOscillators = this.setupOscillators(note, step),
+            _setupOscillators2 = _slicedToArray(_setupOscillators, 8),
+            osc1 = _setupOscillators2[0],
+            osc2 = _setupOscillators2[1],
+            gainNode1 = _setupOscillators2[2],
+            gainNode2 = _setupOscillators2[3],
+            modulator1 = _setupOscillators2[4],
+            modulator2 = _setupOscillators2[5],
+            filter1 = _setupOscillators2[6],
+            filter2 = _setupOscillators2[7];
 
-      osc2.detune.value = tone * 98;
-      osc2.frequency.value = oct * 220;
-      filter2.frequency.setTargetAtTime(5000, this.context.currentTime, 0.03);
-      gainNode2.gain.setTargetAtTime(0, this.context.currentTime + 0.1 + this.decay * 0.02, 0.05);
-
-      osc1.stop(this.context.currentTime + 1);
-      osc2.stop(this.context.currentTime + 1);
-      modulator1.stop(this.context.currentTime + 1);
-      modulator2.stop(this.context.currentTime + 1);
-      modulator3.stop(this.context.currentTime + 1);
-      modulator4.stop(this.context.currentTime + 1);
+        this.storeOscillators({
+          osc1: osc1, osc2: osc2,
+          modulator1: modulator1, modulator2: modulator2,
+          gainNode1: gainNode1, gainNode2: gainNode2
+        });
+        modulator1.start();
+        modulator2.start();
+        osc1.start();
+        osc2.start();
+        filter1.frequency.setTargetAtTime(5000, this.context.currentTime, 0.03);
+        filter2.frequency.setTargetAtTime(5000, this.context.currentTime, 0.03);
+        this.playing = true;
+      }
+      if (step && this.playing || hold && step && this.playing) {
+        this.oscillators.osc1.detune.value = note * 102;
+        this.oscillators.osc1.frequency.value = step * 220;
+        this.oscillators.osc2.detune.value = note * 98;
+        this.oscillators.osc2.frequency.value = step * 220;
+      }
+      if (!step && this.oscillators.osc1) {
+        this.stopAll();
+      }
     }
   }]);
 
@@ -876,41 +894,51 @@ var Hat = function () {
 
     this.context = ctx;
     this.prevOsc = null;
+    this.buffer = noiseBuffer(ctx);
   }
 
   _createClass(Hat, [{
     key: 'getNoise',
     value: function getNoise() {
       var noise = this.context.createBufferSource();
-      noise.buffer = noiseBuffer(this.context);
+      noise.buffer = this.buffer;
       var noiseFilter = this.context.createBiquadFilter();
       noiseFilter.type = 'highpass';
       noiseFilter.frequency.value = 2500;
       noise.connect(noiseFilter);
 
       var noiseEnvelope = this.context.createGain();
-      noiseEnvelope.gain.value = 0.4;
+      noiseEnvelope.gain.value = 0.7;
       noiseFilter.connect(noiseEnvelope);
       noiseEnvelope.connect(this.context.destination);
       return [noise, noiseEnvelope];
     }
   }, {
-    key: 'play',
-    value: function play(tone, oct) {
+    key: 'stopAll',
+    value: function stopAll() {
       if (this.prevOsc) {
-        this.prevOsc.stop();
+        this.prevOsc.stop(0);
       }
-      var time = oct === 1 ? 0.01 : 0.05;
+    }
+  }, {
+    key: 'play',
+    value: function play(_ref) {
+      var step = _ref.step;
 
-      var _getNoise = this.getNoise(),
-          _getNoise2 = _slicedToArray(_getNoise, 2),
-          noise = _getNoise2[0],
-          noiseEnvelope = _getNoise2[1];
+      if (step) {
+        this.stopAll();
+        var time = step === 1 ? 0.01 : 0.05;
 
-      this.prevOsc = noise;
-      noise.start();
-      noiseEnvelope.gain.setTargetAtTime(0, this.context.currentTime, time);
-      noise.stop(this.context.currentTime + 0.30);
+        var _getNoise = this.getNoise(),
+            _getNoise2 = _slicedToArray(_getNoise, 2),
+            noise = _getNoise2[0],
+            noiseEnvelope = _getNoise2[1];
+
+        this.prevOsc = noise;
+        noise.start(0);
+        noiseEnvelope.gain.setTargetAtTime(0, this.context.currentTime, time);
+        noise.stop(this.context.currentTime + 0.30);
+      }
     }
   }]);
 
@@ -953,6 +981,8 @@ var KickSynth = function () {
 
     this.context = ctx;
     this.decay = 0;
+    this.gainNode = this.context.createGain();
+    this.blipGain = this.context.createGain();
     this.config = {
       type: 'sine'
     };
@@ -969,16 +999,19 @@ var KickSynth = function () {
       this.decay = value;
     }
   }, {
+    key: 'stopAll',
+    value: function stopAll() {}
+  }, {
     key: 'getOscillators',
-    value: function getOscillators(tone) {
+    value: function getOscillators(note) {
       var osc = this.context.createOscillator();
       var blipOsc = this.context.createOscillator();
       var gain = this.context.createGain();
       var blipGain = this.context.createGain();
       osc.frequency.value = 55;
       blipOsc.frequency.value = 440;
-      osc.detune.value = tone * 100;
-      blipOsc.detune.value = tone * 100;
+      osc.detune.value = note * 100;
+      blipOsc.detune.value = note * 100;
       osc.connect(gain);
       blipOsc.connect(blipGain);
       gain.connect(this.context.destination);
@@ -987,21 +1020,26 @@ var KickSynth = function () {
     }
   }, {
     key: 'play',
-    value: function play(tone) {
-      var _getOscillators = this.getOscillators(tone),
+    value: function play(_ref) {
+      var step = _ref.step,
+          note = _ref.note;
+
+      var _getOscillators = this.getOscillators(note),
           _getOscillators2 = _slicedToArray(_getOscillators, 4),
           osc = _getOscillators2[0],
           gain = _getOscillators2[1],
           blipOsc = _getOscillators2[2],
           blipGain = _getOscillators2[3];
 
-      osc.start();
-      blipOsc.start();
-      gain.gain.setTargetAtTime(0, this.context.currentTime, 0.07 + this.decay * 0.01);
-      blipGain.gain.setTargetAtTime(0, this.context.currentTime, 0.10);
-      blipOsc.frequency.setTargetAtTime(55, this.context.currentTime, 0.05);
-      osc.stop(this.context.currentTime + 1);
-      blipOsc.stop(this.context.currentTime + 1);
+      if (step) {
+        osc.start();
+        blipOsc.start();
+        gain.gain.setTargetAtTime(0, this.context.currentTime, 0.07 + this.decay * 0.01);
+        blipGain.gain.setTargetAtTime(0, this.context.currentTime, 0.10);
+        blipOsc.frequency.setTargetAtTime(55, this.context.currentTime, 0.05);
+        osc.stop(this.context.currentTime + 1);
+        blipOsc.stop(this.context.currentTime + 1);
+      }
     }
   }]);
 
@@ -1036,6 +1074,7 @@ var LeadSynth = function () {
     this.previousOct = 1;
     this.decay = 0;
     this.prevOsc = null;
+    this.playing = false;
     this.config = {
       type: 'sine'
     };
@@ -1057,9 +1096,18 @@ var LeadSynth = function () {
       this.config.type = value;
     }
   }, {
+    key: 'stopAll',
+    value: function stopAll() {
+      if (!this.prevOsc) return;
+      this.prevGainNode.gain.setTargetAtTime(0, this.context.currentTime + 0.1 + this.decay * 0.02, 0.05);
+      this.prevOsc.stop(this.context.currentTime + 1);
+      this.prevOsc = null;
+      this.playing = false;
+    }
+  }, {
     key: 'getOscillators',
-    value: function getOscillators(tone, oct) {
-      this.previousTone = tone;
+    value: function getOscillators(note, oct) {
+      this.previousTone = note;
       this.previousOct = oct;
 
       var osc = this.context.createOscillator();
@@ -1082,26 +1130,34 @@ var LeadSynth = function () {
     }
   }, {
     key: 'play',
-    value: function play(tone, oct) {
-      if (this.prevOsc) this.prevOsc.stop();
+    value: function play(_ref) {
+      var step = _ref.step,
+          note = _ref.note,
+          hold = _ref.hold;
 
-      var _getOscillators = this.getOscillators(tone, oct),
-          _getOscillators2 = _slicedToArray(_getOscillators, 3),
-          osc = _getOscillators2[0],
-          gainNode = _getOscillators2[1],
-          filter = _getOscillators2[2];
+      if (step && !hold) {
+        this.stopAll();
 
-      this.prevOsc = osc;
+        var _getOscillators = this.getOscillators(note, step),
+            _getOscillators2 = _slicedToArray(_getOscillators, 3),
+            osc = _getOscillators2[0],
+            gainNode = _getOscillators2[1],
+            filter = _getOscillators2[2];
 
-      osc.start();
-
-      osc.detune.setTargetAtTime(tone * 100, this.context.currentTime, 0.03);
-      osc.frequency.setTargetAtTime(oct * 440, this.context.currentTime, 0.03);
-      gainNode.gain.setTargetAtTime(0.4, this.context.currentTime, 0.001);
-      gainNode.gain.setTargetAtTime(0, this.context.currentTime + 0.1 + this.decay * 0.02, 0.05);
-      filter.frequency.setTargetAtTime(1000, this.context.currentTime, 0.03);
-
-      osc.stop(this.context.currentTime + 1);
+        this.prevOsc = osc;
+        this.prevGainNode = gainNode;
+        osc.start();
+        gainNode.gain.setTargetAtTime(0.4, this.context.currentTime, 0.001);
+        filter.frequency.setTargetAtTime(1000, this.context.currentTime, 0.03);
+        this.playing = true;
+      }
+      if (step && this.playing || hold && step && this.playing) {
+        this.prevOsc.detune.setTargetAtTime(note * 100, this.context.currentTime, 0.03);
+        this.prevOsc.frequency.setTargetAtTime(step * 440, this.context.currentTime, 0.03);
+      }
+      if (!step && this.prevOsc) {
+        this.stopAll();
+      }
     }
   }]);
 
@@ -1135,13 +1191,17 @@ var Snare = function () {
     this.config = {
       type: 'triangle'
     };
+    this.buffer = noiseBuffer(ctx);
   }
 
   _createClass(Snare, [{
+    key: 'stopAll',
+    value: function stopAll() {}
+  }, {
     key: 'getNoise',
     value: function getNoise() {
       var noise = this.context.createBufferSource();
-      noise.buffer = noiseBuffer(this.context);
+      noise.buffer = this.buffer;
       var noiseFilter = this.context.createBiquadFilter();
       noiseFilter.type = 'highpass';
       noiseFilter.frequency.value = 1000;
@@ -1166,23 +1226,27 @@ var Snare = function () {
     }
   }, {
     key: 'play',
-    value: function play(tone) {
-      var _getOscillators = this.getOscillators(),
-          _getOscillators2 = _slicedToArray(_getOscillators, 2),
-          osc = _getOscillators2[0],
-          gain = _getOscillators2[1];
+    value: function play(_ref) {
+      var step = _ref.step;
 
-      var _getNoise = this.getNoise(),
-          _getNoise2 = _slicedToArray(_getNoise, 2),
-          noise = _getNoise2[0],
-          noiseEnvelope = _getNoise2[1];
+      if (step) {
+        var _getOscillators = this.getOscillators(),
+            _getOscillators2 = _slicedToArray(_getOscillators, 2),
+            osc = _getOscillators2[0],
+            gain = _getOscillators2[1];
 
-      osc.start();
-      noise.start();
-      gain.gain.setTargetAtTime(0, this.context.currentTime, 0.04);
-      noiseEnvelope.gain.setTargetAtTime(0, this.context.currentTime, 0.03);
-      osc.stop(this.context.currentTime + 0.30);
-      noise.stop(this.context.currentTime + 0.30);
+        var _getNoise = this.getNoise(),
+            _getNoise2 = _slicedToArray(_getNoise, 2),
+            noise = _getNoise2[0],
+            noiseEnvelope = _getNoise2[1];
+
+        osc.start();
+        noise.start();
+        gain.gain.setTargetAtTime(0, this.context.currentTime, 0.04);
+        noiseEnvelope.gain.setTargetAtTime(0, this.context.currentTime, 0.03);
+        osc.stop(this.context.currentTime + 0.30);
+        noise.stop(this.context.currentTime + 0.30);
+      }
     }
   }]);
 
@@ -1224,10 +1288,9 @@ var KeySynth = function () {
     _classCallCheck(this, KeySynth);
 
     this.context = ctx;
-    this.config = {
-      type: 'sawtooth'
-    };
+    this.oscillators = {};
     this.filterValue = 0;
+    this.playing = false;
   }
 
   _createClass(KeySynth, [{
@@ -1241,54 +1304,90 @@ var KeySynth = function () {
       this.filterValue = value;
     }
   }, {
+    key: 'stopAll',
+    value: function stopAll() {
+      if (!this.oscillators.osc1) return;
+      this.oscillators.gain[0].gain.setTargetAtTime(0, this.context.currentTime + 0.05, 0.1);
+      this.oscillators.gain[1].gain.setTargetAtTime(0, this.context.currentTime + 0.05, 0.1);
+      this.oscillators.gain[2].gain.setTargetAtTime(0, this.context.currentTime + 0.05, 0.1);
+      this.oscillators.osc1.stop(this.context.currentTime + 1);
+      this.oscillators.osc2.stop(this.context.currentTime + 1);
+      this.oscillators.osc3.stop(this.context.currentTime + 1);
+      this.oscillators = {};
+      this.playing = false;
+    }
+  }, {
+    key: 'makeOscillator',
+    value: function makeOscillator(waveform) {
+      var osc = this.context.createOscillator();
+      osc.type = waveform;
+      return osc;
+    }
+  }, {
     key: 'getOscillators',
-    value: function getOscillators(tone, oct) {
+    value: function getOscillators(note, oct) {
       var _this = this;
 
-      var osc = [this.context.createOscillator(), this.context.createOscillator(), this.context.createOscillator()];
+      var osc1 = this.makeOscillator('triangle');
+      var osc2 = this.makeOscillator('sawtooth');
+      var osc3 = this.makeOscillator('sawtooth');
       var gain = [this.context.createGain(), this.context.createGain(), this.context.createGain()];
       var filters = [this.context.createBiquadFilter(), this.context.createBiquadFilter()];
-      filters[0].frequency.value = 1000;
-      filters[1].frequency.value = 1000;
-      osc[0].frequency.value = 55 * oct;
-      osc[1].frequency.value = 55 * oct;
-      osc[2].frequency.value = 110 * oct;
-      osc[0].detune.value = tone * 100;
-      osc[1].detune.value = tone * 101;
-      osc[2].detune.value = tone * 99;
-      osc.forEach(function (o, i) {
-        o.type = _this.config.type;
-        if (!i) {
-          o.connect(gain[i]);
-        } else {
-          o.connect(filters[i - 1]);
-          filters[i - 1].connect(gain[i]);
-        }
-        gain[i].connect(_this.context.destination);
+      filters[0].frequency.value = 500;
+      filters[1].frequency.value = 500;
+
+      osc1.connect(gain[0]);
+      osc2.connect(filters[0]);
+      osc3.connect(filters[1]);
+      filters[0].connect(gain[1]);
+      filters[1].connect(gain[2]);
+      gain.forEach(function (g) {
+        g.gain.value = 0.4 - _this.filterValue * 0.05;
+        g.connect(_this.context.destination);
       });
-      osc[0].type = 'triangle';
-      return [osc, gain, filters];
+
+      return [osc1, osc2, osc3, gain, filters];
     }
   }, {
     key: 'play',
-    value: function play(tone, oct) {
-      var _this2 = this;
+    value: function play(_ref) {
+      var step = _ref.step,
+          note = _ref.note,
+          hold = _ref.hold;
 
-      var _getOscillators = this.getOscillators(tone, oct),
-          _getOscillators2 = _slicedToArray(_getOscillators, 3),
-          osc = _getOscillators2[0],
-          gain = _getOscillators2[1],
-          filters = _getOscillators2[2];
+      if (step && !hold) {
+        this.stopAll();
 
-      var duration = 100;
-      osc.forEach(function (o, i) {
-        o.start();
-        if (i > 0) {
-          filters[1].frequency.setTargetAtTime(_this2.filterValue * 1000, _this2.context.currentTime, 0.05);
-        }
-        gain[i].gain.setTargetAtTime(0, _this2.context.currentTime, 0.035);
-        o.stop(_this2.context.currentTime + 0.5);
-      });
+        var _getOscillators = this.getOscillators(note, step),
+            _getOscillators2 = _slicedToArray(_getOscillators, 5),
+            osc1 = _getOscillators2[0],
+            osc2 = _getOscillators2[1],
+            osc3 = _getOscillators2[2],
+            gain = _getOscillators2[3],
+            filters = _getOscillators2[4];
+
+        this.oscillators = {
+          osc1: osc1, osc2: osc2, osc3: osc3,
+          gain: gain, filters: filters
+        };
+        filters[0].frequency.setTargetAtTime(this.filterValue * 1000, this.context.currentTime + 0.02, 0.2);
+        filters[1].frequency.setTargetAtTime(this.filterValue * 1000, this.context.currentTime + 0.02, 0.2);
+        osc1.start();
+        osc2.start();
+        osc3.start();
+        this.playing = true;
+      }
+      if (step && this.playing || hold && step && this.playing && this.oscillators.osc1) {
+        this.oscillators.osc1.frequency.value = 55 * step;
+        this.oscillators.osc2.frequency.value = 55 * step;
+        this.oscillators.osc3.frequency.value = 110 * step;
+        this.oscillators.osc1.detune.value = 99 * note;
+        this.oscillators.osc2.detune.value = 101 * note;
+        this.oscillators.osc3.detune.value = 100 * note;
+      }
+      if (!step) {
+        this.stopAll();
+      }
     }
   }]);
 
@@ -1381,12 +1480,32 @@ state.blocks['7/0'] = new _classes.Word('Copy', ctx, 7 * 40, 0, state.copyPage.b
 state.blocks['8/0'] = new _classes.Word('Paste', ctx, 8 * 40, 0, state.pastePage.bind(state));
 
 canvas.onclick = function (e) {
-  var x = Math.floor(e.clientX / 40);
-  var y = Math.floor(e.clientY / 40);
+  var totalOffsetX = 0;
+  var totalOffsetY = 0;
+  var canvasX = 0;
+  var canvasY = 0;
+  var currentElement = this;
+  do {
+    totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
+    totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
+  } while (currentElement = currentElement.offsetParent);
+  canvasX = e.pageX - totalOffsetX - window.scrollX;
+  canvasY = e.pageY - totalOffsetY - window.scrollY;
+
+  var x = Math.floor(canvasX / 40);
+  var y = Math.floor(canvasY / 40);
+  var innerX = canvasX - x * 40;
+  var innerY = canvasY - y * 40;
   var key = x + '/' + y;
   var module = state.blocks[key];
   if (module) {
-    state.blocks[key].handleClick(x, y);
+    state.blocks[key].handleClick(x, y, innerX, innerY);
+  }
+};
+
+window.onkeydown = function (e) {
+  if (e.code && e.code === 'Space') {
+    state.togglePlay();
   }
 };
 
