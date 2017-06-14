@@ -7,9 +7,10 @@ import Hat from './instruments/hat'
 import { LOOP_LENGTH } from './constants'
 
 function makeStepArray(steps){
-  let arr = []
-  arr.length = steps
-  arr.fill(0)
+  let empty = []
+  empty.length = steps
+  empty.fill(undefined)
+  let arr = empty.map(item => ({ step: 0, note: 0, hold: false }))
   return arr
 }
 
@@ -26,12 +27,6 @@ export default class State {
       leadSynth: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       fmSynth: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       hat: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)]
-    }
-    this.notes = {
-      fmSynth: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
-      key: [makeStepArray(16),makeStepArray(16),makeStepArray(16),makeStepArray(16)],
-      kick: [makeStepArray(16),makeStepArray(16),makeStepArray(16),makeStepArray(16)],
-      leadSynth: [makeStepArray(16),makeStepArray(16),makeStepArray(16),makeStepArray(16)]
     }
     this.copyBuffer = { notes: {}, steps: {} }
     this.blinkers = []
@@ -52,11 +47,11 @@ export default class State {
     return value
   }
   toggleStep(idx, type, values){
-    this.steps[type][this.page][idx] = (this.steps[type][this.page][idx] + 1) % values
+    this.steps[type][this.page][idx].step = (this.steps[type][this.page][idx].step + 1) % values
   }
   togglePlay(){
     this.isPlaying = !this.isPlaying
-    
+
     if(this.isPlaying){
       this.noteTime = 0.0
       this.startTime = this.context.currentTime + 0.005
@@ -69,18 +64,12 @@ export default class State {
   }
   copyPage(){
     Object.keys(this.steps).forEach(stepKey => {
-      this.copyBuffer.steps[stepKey] = this.steps[stepKey][this.page].slice()
-    })
-    Object.keys(this.notes).forEach(noteKey => {
-      this.copyBuffer.notes[noteKey] = this.notes[noteKey][this.page].slice()
+      this.copyBuffer.steps[stepKey] = this.steps[stepKey][this.page].slice().map(step => Object.assign({}, step))
     })
   }
   pastePage(){
     Object.keys(this.steps).forEach(stepKey => {
       this.steps[stepKey][this.page] = this.copyBuffer.steps[stepKey].slice()
-    })
-    Object.keys(this.notes).forEach(noteKey => {
-      this.notes[noteKey][this.page] = this.copyBuffer.notes[noteKey].slice()
     })
     this.refreshScreen()
   }
@@ -94,12 +83,8 @@ export default class State {
       this.blinkers[this.rhythmIndex].toggle()
       if(this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle()
       Object.keys(this.steps).forEach(type => {
-        if(this.steps[type][this.page][this.rhythmIndex]){
-          const note = this.notes[type] && this.notes[type][this.page][this.rhythmIndex]
-          this.instruments[type].play(note, this.steps[type][this.page][this.rhythmIndex])
-        }
+        this.instruments[type].play(this.steps[type][this.page][this.rhythmIndex])
       })
-      //Insert draw stuff here
       this.advanceNote()
     }
     this.interval = setTimeout(() => { this.schedule() }, 0)
@@ -111,13 +96,16 @@ export default class State {
     this.previousRhythmIndex = this.rhythmIndex
     this.rhythmIndex++;
     if (this.rhythmIndex === LOOP_LENGTH) {
-        this.rhythmIndex = 0;
+      this.rhythmIndex = 0;
     }
 
     //0.25 because each square is a 16th note
     this.noteTime += 0.25 * secondsPerBeat;
   }
   stop(){
+    Object.keys(this.instruments).forEach(key => {
+      this.instruments[key].stopAll()
+    })
     this.blinkers[this.previousRhythmIndex].toggle()
     window.clearInterval(this.interval)
   }

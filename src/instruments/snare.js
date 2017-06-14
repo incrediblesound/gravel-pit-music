@@ -4,10 +4,12 @@ export default class Snare {
     this.config = {
       type: 'triangle'
     }
+    this.buffer = noiseBuffer(ctx)
   }
+  stopAll(){}
   getNoise(){
     const noise = this.context.createBufferSource();
-    noise.buffer = noiseBuffer(this.context);
+    noise.buffer = this.buffer
     const noiseFilter = this.context.createBiquadFilter();
     noiseFilter.type = 'highpass';
     noiseFilter.frequency.value = 1000;
@@ -28,15 +30,17 @@ export default class Snare {
   osc.frequency.value = 150
   return [ osc, gain ]
   }
-  play(tone){
-    const [ osc, gain ] = this.getOscillators()
-    const [ noise, noiseEnvelope ] = this.getNoise()
-    osc.start()
-    noise.start()
-    gain.gain.setTargetAtTime(0, this.context.currentTime, 0.04);
-    noiseEnvelope.gain.setTargetAtTime(0, this.context.currentTime, 0.03);
-    osc.stop(this.context.currentTime + 0.30)
-    noise.stop(this.context.currentTime + 0.30)
+  play({ step }){
+    if(step){
+      const [ osc, gain ] = this.getOscillators()
+      const [ noise, noiseEnvelope ] = this.getNoise()
+      osc.start()
+      noise.start()
+      gain.gain.setTargetAtTime(0, this.context.currentTime, 0.04);
+      noiseEnvelope.gain.setTargetAtTime(0, this.context.currentTime, 0.03);
+      osc.stop(this.context.currentTime + 0.30)
+      noise.stop(this.context.currentTime + 0.30)
+    }
   }
 }
 

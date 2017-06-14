@@ -89,10 +89,12 @@ canvas.onclick = function (e) {
 
   let x = Math.floor(canvasX/40)
   let y = Math.floor(canvasY/40)
+  let innerX = canvasX - (x * 40)
+  let innerY = canvasY - (y * 40)
   const key = `${x}/${y}`
   const module = state.blocks[key]
   if(module){
-    state.blocks[key].handleClick(x, y)
+    state.blocks[key].handleClick(x, y, innerX, innerY)
   }
 }
 
