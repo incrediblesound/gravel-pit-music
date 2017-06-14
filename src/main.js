@@ -1,15 +1,13 @@
 import State from './state'
 import { BinSwitch, OctaveSwitch } from './switch'
 import Note from './note'
-import {
-  Background,
-  PlayBtn,
-  BeatMarker,
-  Blinker,
-  Word,
-  Options,
-  PageButton
- } from './classes'
+import PlayBtn from './ui/PlayBtn'
+import BeatMarker from './ui/BeatMarker'
+import Blinker from './ui/Blinker'
+import Word from './ui/Word'
+import Options from './ui/Options'
+import PageButton from './ui/PageButton'
+import Tempo from './ui/Tempo'
 
 const canvas = document.getElementById('synth');
 const ctx = canvas.getContext('2d');
@@ -34,7 +32,22 @@ for(var i = 0; i < 16; i++){
   state.moduleMap[`${i+2}/2`] = new Blinker(i, state, ctx)
 }
 /* Play button */
-state.blocks['0/0'] = new PlayBtn(ctx, state, 0, 0)
+const playBtn = new PlayBtn(ctx, state, 0, 0)
+state.blocks['0/0'] = playBtn
+
+/* Page controls */
+const pageButton = new PageButton(state, ctx, 2*40, 0)
+state.blocks['2/0'] = pageButton
+state.blocks['3/0'] = pageButton
+state.blocks['4/0'] = pageButton
+state.blocks['5/0'] = pageButton
+state.blocks['7/0'] = new Word('Copy', ctx, 7*40, 0, state.copyPage.bind(state))
+state.blocks['8/0'] = new Word('Paste', ctx, 8*40, 0, state.pastePage.bind(state))
+/* Tempo */
+const tempo = new Tempo(state, ctx, 11*40, 0)
+state.blocks['11/0'] = tempo
+state.blocks['12/0'] = tempo
+
 /* 4 Beat markers */
 state.blocks['2/16'] = new BeatMarker(ctx, 2*40, 16*40)
 state.blocks['6/16'] = new BeatMarker(ctx, 6*40, 16*40)
@@ -64,16 +77,6 @@ const updateLeadWave = state.instruments.leadSynth.setWave.bind(state.instrument
 state.blocks['21/8'] = new Word('Wave', ctx, 21*40, 8*40)
 state.blocks['22/8'] = new Options(['sine','square', 'sawtooth'], updateLeadWave, ctx, 22*40+5, 8*40)
 
-
-const pageButton = new PageButton(state, ctx, 2*40, 0)
-state.blocks['2/0'] = pageButton
-state.blocks['3/0'] = pageButton
-state.blocks['4/0'] = pageButton
-state.blocks['5/0'] = pageButton
-
-state.blocks['7/0'] = new Word('Copy', ctx, 7*40, 0, state.copyPage.bind(state))
-state.blocks['8/0'] = new Word('Paste', ctx, 8*40, 0, state.pastePage.bind(state))
-
 canvas.onclick = function (e) {
   let totalOffsetX = 0;
   let totalOffsetY = 0;
@@ -101,6 +104,7 @@ canvas.onclick = function (e) {
 window.onkeydown = function(e){
   if(e.code && e.code === 'Space'){
     state.togglePlay()
+    playBtn.render()
   }
 }
 

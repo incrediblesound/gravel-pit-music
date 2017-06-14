@@ -17,6 +17,7 @@ function makeStepArray(steps){
 export default class State {
   constructor(audioCtx) {
     this.isPlaying = false
+    this.tempo = 120
     this.page = 0
     this.blocks = {}
     this.moduleMap = {}
@@ -90,9 +91,7 @@ export default class State {
     this.interval = setTimeout(() => { this.schedule() }, 0)
   }
   advanceNote(){
-    // Setting tempo to 60 BPM just for now
-    let tempo = 90
-    let secondsPerBeat = 60 / tempo
+    let secondsPerBeat = 60 / this.tempo
     this.previousRhythmIndex = this.rhythmIndex
     this.rhythmIndex++;
     if (this.rhythmIndex === LOOP_LENGTH) {
