@@ -3,6 +3,8 @@ export default class fmSynth {
     this.context = ctx
     this.decay = 0
     this.prevOsc = null
+    this.oscillators = {}
+    this.playing = false
     this.config = {
       type: 'square'
     }
@@ -15,6 +17,22 @@ export default class fmSynth {
   }
   setWave(value){
     this.config.type = value
+  }
+  storeOscillators(data){
+    Object.keys(data).forEach(key => {
+      this.oscillators[key] = data[key]
+    })
+  }
+  stopAll(){
+    if(!this.oscillators.osc1) return
+    this.oscillators.gainNode1.gain.setTargetAtTime(0, this.context.currentTime+(this.decay*0.02), 0.05);
+    this.oscillators.gainNode2.gain.setTargetAtTime(0, this.context.currentTime+(this.decay*0.02), 0.05);
+    this.oscillators.osc1.stop(this.context.currentTime+1)
+    this.oscillators.osc2.stop(this.context.currentTime+1)
+    this.oscillators.modulator1.stop(this.context.currentTime+1)
+    this.oscillators.modulator2.stop(this.context.currentTime+1)
+    this.oscillators = {}
+    this.playing = false
   }
   getModulator(oct, wave, gain){
     const modulator = this.context.createOscillator()
@@ -48,54 +66,47 @@ export default class fmSynth {
   setupOscillators(){
     const [ osc1, filter1, gainNode1 ] = this.getOscillator('left')
     const [ osc2, filter2, gainNode2 ] = this.getOscillator('right')
-    const [ modulator1, modulatorGain1 ] = this.getModulator(220, 'sine', 25)
-    const [ modulator2, modulatorGain2 ] = this.getModulator(110, 'sawtooth', 20)
-    const [ modulator3, modulatorGain3 ] = this.getModulator(55, 'sawtooth', 25)
-    const [ modulator4, modulatorGain4 ] = this.getModulator(220, 'square', 30)
-    modulatorGain1.connect(modulator2.frequency)
-    modulatorGain2.connect(osc1.frequency)
-    modulatorGain3.connect(modulator4.frequency)
-    modulatorGain4.connect(osc2.frequency)
+    const [ modulator1, modulatorGain1 ] = this.getModulator(110, 'sawtooth', 40)
+    const [ modulator2, modulatorGain2 ] = this.getModulator(220, 'square', 35)
+    modulatorGain1.connect(osc1.frequency)
+    modulatorGain2.connect(osc2.frequency)
     return [
       osc1, osc2,
       gainNode1, gainNode2,
       modulator1, modulator2,
-      modulator3, modulator4,
-      filter1,
-      filter2
+      filter1, filter2
      ]
   }
-  play(tone, oct){
-    const [
-      osc1, osc2,
-      gainNode1, gainNode2,
-      modulator1, modulator2,
-      modulator3, modulator4,
-      filter1,
-      filter2
-    ] = this.setupOscillators(tone, oct)
-    modulator1.start()
-    modulator2.start()
-    modulator3.start()
-    modulator4.start()
-    osc1.start()
-    osc2.start()
-
-    osc1.detune.value = tone*102
-    osc1.frequency.value = oct*220
-    filter1.frequency.setTargetAtTime(5000, this.context.currentTime, 0.03)
-    gainNode1.gain.setTargetAtTime(0, this.context.currentTime+0.1+(this.decay*0.02), 0.05);
-
-    osc2.detune.value = tone*98
-    osc2.frequency.value = oct*220
-    filter2.frequency.setTargetAtTime(5000, this.context.currentTime, 0.03)
-    gainNode2.gain.setTargetAtTime(0, this.context.currentTime+0.1+(this.decay*0.02), 0.05);
-
-    osc1.stop(this.context.currentTime+1)
-    osc2.stop(this.context.currentTime+1)
-    modulator1.stop(this.context.currentTime+1)
-    modulator2.stop(this.context.currentTime+1)
-    modulator3.stop(this.context.currentTime+1)
-    modulator4.stop(this.context.currentTime+1)
+  play({ step, note, hold }){
+    if(step && !hold){
+      this.stopAll()
+      const [
+        osc1, osc2,
+        gainNode1, gainNode2,
+        modulator1, modulator2,
+        filter1, filter2
+      ] = this.setupOscillators(note, step)
+      this.storeOscillators({
+        osc1, osc2,
+        modulator1, modulator2,
+        gainNode1, gainNode2
+      })
+      modulator1.start()
+      modulator2.start()
+      osc1.start()
+      osc2.start()
+      filter1.frequency.setTargetAtTime(5000, this.context.currentTime, 0.03)
+      filter2.frequency.setTargetAtTime(5000, this.context.currentTime, 0.03)
+      this.playing = true
+    }
+    if((step && this.playing) || (hold && step && this.playing)){
+      this.oscillators.osc1.detune.value = note*102
+      this.oscillators.osc1.frequency.value = step*220
+      this.oscillators.osc2.detune.value = note*98
+      this.oscillators.osc2.frequency.value = step*220
+    }
+    if(!step && this.oscillators.osc1){
+      this.stopAll()
+    }
   }
 }

@@ -13,13 +13,13 @@ export default class Note {
   render(){
     this.context.fillStyle = 'black'
     this.context.fillRect(this.x, this.y, 40, 40)
-    this.context.clearRect(this.x, this.y, 39, 39)
-    const noteIndex = this.state.notes[this.type][this.state.page][this.idx]
+    this.context.clearRect(this.x+1, this.y+1, 38, 38)
+    const noteIndex = this.state.steps[this.type][this.state.page][this.idx].note
     this.context.fillText(this.notes[noteIndex], this.x+15, this.y+25, 15);
   }
   handleClick(){
-    const page = this.state.notes[this.type][this.state.page]
-    page[this.idx] = page[this.idx] === 11 ? 0 : page[this.idx]+1
+    const page = this.state.steps[this.type][this.state.page]
+    page[this.idx].note = page[this.idx].note === 11 ? 0 : page[this.idx].note+1
     this.render()
   }
 }

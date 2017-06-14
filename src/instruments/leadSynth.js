@@ -5,6 +5,7 @@ export default class LeadSynth {
     this.previousOct = 1
     this.decay = 0
     this.prevOsc = null
+    this.playing = false
     this.config = {
       type: 'sine'
     }
@@ -18,8 +19,15 @@ export default class LeadSynth {
   setWave(value){
     this.config.type = value
   }
-  getOscillators(tone, oct){
-  this.previousTone = tone
+  stopAll(){
+    if(!this.prevOsc) return
+    this.prevGainNode.gain.setTargetAtTime(0, this.context.currentTime+0.1+(this.decay*0.02), 0.05);
+    this.prevOsc.stop(this.context.currentTime+1)
+    this.prevOsc = null
+    this.playing = false
+  }
+  getOscillators(note, oct){
+  this.previousTone = note
   this.previousOct = oct
 
   const osc = this.context.createOscillator()
@@ -31,8 +39,8 @@ export default class LeadSynth {
   gainNode.gain.value = 0
 
   const filter = this.context.createBiquadFilter();
-  filter.type = 'lowpass';
-  filter.frequency.value = 0;
+  filter.type = 'lowpass'
+  filter.frequency.value = 0
 
   osc.connect(filter)
   filter.connect(gainNode)
@@ -40,20 +48,24 @@ export default class LeadSynth {
 
   return [ osc, gainNode, filter ]
   }
-  play(tone, oct){
-    if(this.prevOsc) this.prevOsc.stop()
+  play({ step, note, hold }){
+    if(step && !hold){
+      this.stopAll()
+      const [ osc, gainNode, filter ] = this.getOscillators(note, step)
+      this.prevOsc = osc
+      this.prevGainNode = gainNode
+      osc.start()
+      gainNode.gain.setTargetAtTime(0.4, this.context.currentTime, 0.001);
+      filter.frequency.setTargetAtTime(1000, this.context.currentTime, 0.03)
+      this.playing = true
+    }
+    if((step && this.playing) || (hold && step && this.playing)){
+      this.prevOsc.detune.setTargetAtTime(note*100, this.context.currentTime, 0.03)
+      this.prevOsc.frequency.setTargetAtTime(step*440, this.context.currentTime, 0.03)
+    }
+    if(!step && this.prevOsc){
+      this.stopAll()
+    }
 
-    const [ osc, gainNode, filter ] = this.getOscillators(tone, oct)
-    this.prevOsc = osc
-
-    osc.start()
-
-    osc.detune.setTargetAtTime(tone*100, this.context.currentTime, 0.03)
-    osc.frequency.setTargetAtTime(oct*440, this.context.currentTime, 0.03)
-    gainNode.gain.setTargetAtTime(0.4, this.context.currentTime, 0.001);
-    gainNode.gain.setTargetAtTime(0, this.context.currentTime+0.1+(this.decay*0.02), 0.05);
-    filter.frequency.setTargetAtTime(1000, this.context.currentTime, 0.03)
-    
-    osc.stop(this.context.currentTime+1)
   }
 }

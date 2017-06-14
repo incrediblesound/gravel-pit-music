@@ -2,31 +2,37 @@ export default class Hat {
   constructor(ctx){
     this.context = ctx
     this.prevOsc = null
+    this.buffer = noiseBuffer(ctx)
   }
   getNoise(){
     const noise = this.context.createBufferSource();
-    noise.buffer = noiseBuffer(this.context);
+    noise.buffer = this.buffer
     const noiseFilter = this.context.createBiquadFilter();
     noiseFilter.type = 'highpass';
     noiseFilter.frequency.value = 2500;
     noise.connect(noiseFilter);
 
     const noiseEnvelope = this.context.createGain();
-    noiseEnvelope.gain.value = 0.4
+    noiseEnvelope.gain.value = 0.7
     noiseFilter.connect(noiseEnvelope);
     noiseEnvelope.connect(this.context.destination);
     return [ noise, noiseEnvelope ]
   }
-  play(tone, oct){
+  stopAll(){
     if(this.prevOsc){
-      this.prevOsc.stop()
+      this.prevOsc.stop(0)
     }
-    const time = oct === 1 ? 0.01 : 0.05
-    const [ noise, noiseEnvelope ] = this.getNoise()
-    this.prevOsc = noise
-    noise.start()
-    noiseEnvelope.gain.setTargetAtTime(0, this.context.currentTime, time);
-    noise.stop(this.context.currentTime + 0.30)
+  }
+  play({ step }){
+    if(step){
+      this.stopAll()
+      const time = step === 1 ? 0.01 : 0.05
+      const [ noise, noiseEnvelope ] = this.getNoise()
+      this.prevOsc = noise
+      noise.start(0)
+      noiseEnvelope.gain.setTargetAtTime(0, this.context.currentTime, time);
+      noise.stop(this.context.currentTime + 0.30)
+    }
   }
 }
 
