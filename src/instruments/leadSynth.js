@@ -1,23 +1,16 @@
-export default class LeadSynth {
+import Listener from './Listener'
+
+export default class LeadSynth extends Listener {
   constructor(ctx){
+    super()
+    this.volume = 8
     this.context = ctx
     this.previousTone = 0
     this.previousOct = 1
     this.decay = 0
     this.prevOsc = null
     this.playing = false
-    this.config = {
-      type: 'sine'
-    }
-  }
-  newOsc(){
-    return
-  }
-  setDecay(value){
-    this.decay = value
-  }
-  setWave(value){
-    this.config.type = value
+    this.waveform = 'sine'
   }
   stopAll(){
     if(!this.prevOsc) return
@@ -33,14 +26,14 @@ export default class LeadSynth {
   const osc = this.context.createOscillator()
   osc.detune.value = this.previousTone * 100
   osc.frequency.value = this.previousOct * 220
-  osc.type = this.config.type
+  osc.type = this.waveform
 
   const gainNode = this.context.createGain()
   gainNode.gain.value = 0
 
   const filter = this.context.createBiquadFilter();
-  filter.type = 'lowpass'
-  filter.frequency.value = 0
+  // filter.type = 'lowpass'
+  filter.frequency.value = 2500
 
   osc.connect(filter)
   filter.connect(gainNode)
@@ -55,8 +48,8 @@ export default class LeadSynth {
       this.prevOsc = osc
       this.prevGainNode = gainNode
       osc.start()
-      gainNode.gain.setTargetAtTime(0.4, this.context.currentTime, 0.001);
-      filter.frequency.setTargetAtTime(1000, this.context.currentTime, 0.03)
+      gainNode.gain.setTargetAtTime(this.volume*0.1, this.context.currentTime+0.01, 0.02);
+      filter.frequency.setTargetAtTime(500, this.context.currentTime+0.1, 0.03)
       this.playing = true
     }
     if((step && this.playing) || (hold && step && this.playing)){

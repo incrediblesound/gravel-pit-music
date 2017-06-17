@@ -1,15 +1,13 @@
-export default class KeySynth {
+import Listener from './Listener'
+
+export default class KeySynth extends Listener {
   constructor(ctx){
+    super()
+    this.volume = 8
     this.context = ctx
     this.oscillators = {}
     this.filterValue = 0
     this.playing = false
-  }
-  newOsc(){
-    return
-  }
-  setFilter(value){
-    this.filterValue = value
   }
   stopAll(){
     if(!this.oscillators.osc1) return
@@ -37,8 +35,8 @@ export default class KeySynth {
     const filters = [
       this.context.createBiquadFilter(), this.context.createBiquadFilter()
     ]
-    filters[0].frequency.value = 500
-    filters[1].frequency.value = 500
+    filters[0].frequency.value = this.filterValue * 1000
+    filters[1].frequency.value = this.filterValue * 1000
 
     osc1.connect(gain[0])
     osc2.connect(filters[0])
@@ -46,7 +44,7 @@ export default class KeySynth {
     filters[0].connect(gain[1])
     filters[1].connect(gain[2])
     gain.forEach(g => {
-      g.gain.value = 0.4 - (this.filterValue * 0.05)
+      g.gain.value = (this.volume * 0.1) - (this.filterValue * 0.05)
       g.connect(this.context.destination)
     })
 
@@ -60,8 +58,8 @@ export default class KeySynth {
         osc1, osc2, osc3,
         gain, filters
       }
-      filters[0].frequency.setTargetAtTime(this.filterValue*1000, this.context.currentTime+0.02, 0.2)
-      filters[1].frequency.setTargetAtTime(this.filterValue*1000, this.context.currentTime+0.02, 0.2)
+      filters[0].frequency.setTargetAtTime(0, this.context.currentTime+0.02, 0.2)
+      filters[1].frequency.setTargetAtTime(0, this.context.currentTime+0.02, 0.2)
       osc1.start()
       osc2.start()
       osc3.start()

@@ -1,21 +1,31 @@
-export default class Snare {
+import Listener from './Listener'
+
+export default class Snare extends Listener {
   constructor(ctx){
+    super()
+    this.volume = 8
     this.context = ctx
     this.config = {
       type: 'triangle'
     }
     this.buffer = noiseBuffer(ctx)
   }
+  setVolume(value){
+    this.volume = value
+  }
   stopAll(){}
   getNoise(){
     const noise = this.context.createBufferSource();
     noise.buffer = this.buffer
+
     const noiseFilter = this.context.createBiquadFilter();
     noiseFilter.type = 'highpass';
     noiseFilter.frequency.value = 1000;
-    noise.connect(noiseFilter);
 
     const noiseEnvelope = this.context.createGain();
+    noiseEnvelope.gain.value = this.volume * 0.1
+
+    noise.connect(noiseFilter);
     noiseFilter.connect(noiseEnvelope);
     noiseEnvelope.connect(this.context.destination);
     return [ noise, noiseEnvelope ]
@@ -23,11 +33,12 @@ export default class Snare {
   getOscillators(){
   const osc = this.context.createOscillator();
   osc.type = this.config.type;
+  osc.frequency.value = 150
 
   const gain = this.context.createGain()
+  gain.gain.value = this.volume * 0.1
   osc.connect(gain);
   gain.connect(this.context.destination);
-  osc.frequency.value = 150
   return [ osc, gain ]
   }
   play({ step }){
