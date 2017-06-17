@@ -1,18 +1,14 @@
-export default class KickSynth {
+import Listener from './Listener'
+
+export default class KickSynth extends Listener {
   constructor(ctx){
+    super()
+    this.volume = 8
     this.context = ctx
     this.decay = 0
-    this.gainNode = this.context.createGain()
-    this.blipGain = this.context.createGain()
     this.config = {
       type: 'sine'
     }
-  }
-  newOsc(){
-    return
-  }
-  setDecay(value){
-    this.decay = value
   }
   stopAll(){}
   getOscillators(note){
@@ -20,6 +16,8 @@ export default class KickSynth {
     const blipOsc = this.context.createOscillator()
     const gain = this.context.createGain()
     const blipGain = this.context.createGain()
+    gain.gain.value = this.volume * 0.1
+    blipGain.gain.value = this.volume * 0.1
     osc.frequency.value = 55
     blipOsc.frequency.value = 440
     osc.detune.value = note * 100

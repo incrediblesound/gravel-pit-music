@@ -1,7 +1,7 @@
 import KeySynth from './instruments/synth'
 import KickSynth from './instruments/kick'
 import LeadSynth from './instruments/leadSynth'
-import fmSynth from './instruments/fm'
+import fm from './instruments/fm'
 import Snare from './instruments/snare'
 import Hat from './instruments/hat'
 import { LOOP_LENGTH } from './constants'
@@ -16,17 +16,18 @@ function makeStepArray(steps){
 
 export default class State {
   constructor(audioCtx) {
+    this.swingIsOn = false
     this.isPlaying = false
     this.tempo = 120
     this.page = 0
     this.blocks = {}
     this.moduleMap = {}
     this.steps = {
-      key: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      bass: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       kick: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       snare: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
-      leadSynth: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
-      fmSynth: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      lead: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      fm: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       hat: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)]
     }
     this.copyBuffer = { notes: {}, steps: {} }
@@ -34,13 +35,16 @@ export default class State {
     this.step = 0
     this.context = audioCtx
     this.instruments = {
-      key: new KeySynth(audioCtx),
+      bass: new KeySynth(audioCtx),
       kick: new KickSynth(audioCtx),
       snare: new Snare(audioCtx),
-      fmSynth: new fmSynth(audioCtx),
-      leadSynth: new LeadSynth(audioCtx),
+      fm: new fm(audioCtx),
+      lead: new LeadSynth(audioCtx),
       hat: new Hat(audioCtx)
     }
+  }
+  toggleSwing(idx){
+    this.swingIsOn = !this.swingIsOn
   }
   setPage(value){
     this.page = value
@@ -98,8 +102,11 @@ export default class State {
       this.rhythmIndex = 0;
     }
 
-    //0.25 because each square is a 16th note
-    this.noteTime += 0.25 * secondsPerBeat;
+    if(this.swingIsOn){
+      this.noteTime += this.rhythmIndex % 2 ? 0.32 * secondsPerBeat : 0.18 * secondsPerBeat
+    } else {
+      this.noteTime += 0.25 * secondsPerBeat
+    }
   }
   stop(){
     Object.keys(this.instruments).forEach(key => {

@@ -1,5 +1,9 @@
-export default class Hat {
+import Listener from './Listener'
+
+export default class Hat extends Listener {
   constructor(ctx){
+    super()
+    this.volume = 8
     this.context = ctx
     this.prevOsc = null
     this.buffer = noiseBuffer(ctx)
@@ -13,7 +17,7 @@ export default class Hat {
     noise.connect(noiseFilter);
 
     const noiseEnvelope = this.context.createGain();
-    noiseEnvelope.gain.value = 0.7
+    noiseEnvelope.gain.value = this.volume * 0.1
     noiseFilter.connect(noiseEnvelope);
     noiseEnvelope.connect(this.context.destination);
     return [ noise, noiseEnvelope ]
