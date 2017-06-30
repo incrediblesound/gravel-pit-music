@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 19);
+/******/ 	return __webpack_require__(__webpack_require__.s = 18);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -124,81 +124,23 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Note = function () {
-  function Note(idx, type, state, context) {
-    _classCallCheck(this, Note);
-
-    this.type = type;
-    this.notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'], this.state = state;
-    this.context = context;
-    this.idx = idx;
-  }
-
-  _createClass(Note, [{
-    key: 'setPos',
-    value: function setPos(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      this.context.fillStyle = 'black';
-      this.context.fillRect(this.x, this.y, 40, 40);
-      this.context.clearRect(this.x + 1, this.y + 1, 38, 38);
-      var noteIndex = this.state.steps[this.type][this.state.page][this.idx].note;
-      this.context.fillText(this.notes[noteIndex], this.x + 15, this.y + 25, 15);
-    }
-  }, {
-    key: 'handleClick',
-    value: function handleClick() {
-      var page = this.state.steps[this.type][this.state.page];
-      page[this.idx].note = page[this.idx].note === 11 ? 0 : page[this.idx].note + 1;
-      this.render();
-    }
-  }]);
-
-  return Note;
-}();
-
-exports.default = Note;
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _synth = __webpack_require__(18);
-
-var _synth2 = _interopRequireDefault(_synth);
-
-var _kick = __webpack_require__(15);
+var _kick = __webpack_require__(14);
 
 var _kick2 = _interopRequireDefault(_kick);
 
-var _leadSynth = __webpack_require__(16);
+var _leadSynth = __webpack_require__(15);
 
 var _leadSynth2 = _interopRequireDefault(_leadSynth);
 
-var _fm = __webpack_require__(13);
+var _fm = __webpack_require__(12);
 
 var _fm2 = _interopRequireDefault(_fm);
 
-var _snare = __webpack_require__(17);
+var _snare = __webpack_require__(16);
 
 var _snare2 = _interopRequireDefault(_snare);
 
-var _hat = __webpack_require__(14);
+var _hat = __webpack_require__(13);
 
 var _hat2 = _interopRequireDefault(_hat);
 
@@ -228,6 +170,7 @@ var State = function () {
     this.page = 0;
     this.blocks = {};
     this.moduleMap = {};
+    this.children = [];
     this.steps = {
       bass: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       kick: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
@@ -240,27 +183,39 @@ var State = function () {
     this.blinkers = [];
     this.step = 0;
     this.context = audioCtx;
-    this.instruments = {
-      bass: new _synth2.default(audioCtx),
-      kick: new _kick2.default(audioCtx),
-      snare: new _snare2.default(audioCtx),
-      fm: new _fm2.default(audioCtx),
-      lead: new _leadSynth2.default(audioCtx),
-      hat: new _hat2.default(audioCtx)
-    };
+    // this.instruments = {
+    //   bass: new BassSynth(audioCtx),
+    //   kick: new KickSynth(audioCtx),
+    //   snare: new Snare(audioCtx),
+    //   fm: new fm(audioCtx),
+    //   lead: new LeadSynth(audioCtx),
+    //   hat: new Hat(audioCtx)
+    // }
   }
 
   _createClass(State, [{
-    key: 'toggleSwing',
-    value: function toggleSwing(idx) {
-      this.swingIsOn = !this.swingIsOn;
+    key: 'push',
+    value: function push(child) {
+      this.children.push(child);
+      return child;
     }
   }, {
-    key: 'setPage',
-    value: function setPage(value) {
-      this.page = value;
-      this.refreshScreen();
-      return value;
+    key: 'trigger',
+    value: function trigger(message) {
+      switch (message.type) {
+        case 'get_page':
+          return this.steps[message.instrument][this.page];
+        case 'toggle_swing':
+          return this.swingIsOn = !this.swingIsOn;
+        case 'set_page':
+          this.page = message.page;
+          this.drawScreen();
+          return message.page;
+        case 'copy_page':
+          return this.copyPage();
+        case 'paste_page':
+          return this.pastePage();
+      }
     }
   }, {
     key: 'toggleStep',
@@ -309,14 +264,14 @@ var State = function () {
       var _this3 = this;
 
       var currentTime = this.context.currentTime;
-      // The sequence starts at startTime, so normalize currentTime so that it's 0 at the start of the sequence.
       currentTime -= this.startTime;
 
       while (this.noteTime < currentTime + 0.200) {
         var contextPlayTime = this.noteTime + this.startTime;
         this.blinkers[this.rhythmIndex].toggle();
-        if (this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle();
-        Object.keys(this.steps).forEach(function (type) {
+        if (this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle
+        /* for each instrument pass the step object for this page and beat into the play method */
+        ();Object.keys(this.steps).forEach(function (type) {
           _this3.instruments[type].play(_this3.steps[type][_this3.page][_this3.rhythmIndex]);
         });
         this.advanceNote();
@@ -353,29 +308,11 @@ var State = function () {
       window.clearInterval(this.interval);
     }
   }, {
-    key: 'initScreen',
-    value: function initScreen() {
-      for (var i = 0; i < 1020; i += 40) {
-        for (var k = 0; k < 680; k += 40) {
-          var key = i / 40 + '/' + k / 40;
-          var module = this.moduleMap[key];
-          if (module) {
-            module.setPos(i, k);
-            this.blocks[key] = module;
-          }
-          if (this.blocks[key]) this.blocks[key].render();
-        }
-      }
-    }
-  }, {
-    key: 'refreshScreen',
-    value: function refreshScreen() {
-      for (var i = 0; i < 1020; i += 40) {
-        for (var k = 0; k < 680; k += 40) {
-          var key = i / 40 + '/' + k / 40;
-          if (this.blocks[key]) this.blocks[key].render();
-        }
-      }
+    key: 'drawScreen',
+    value: function drawScreen() {
+      this.children.forEach(function (child) {
+        return child.render();
+      });
     }
   }]);
 
@@ -385,116 +322,7 @@ var State = function () {
 exports.default = State;
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.OctaveSwitch = exports.BinSwitch = undefined;
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _constants = __webpack_require__(1);
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var BinSwitch = exports.BinSwitch = function () {
-  function BinSwitch(idx, type, state, ctx) {
-    _classCallCheck(this, BinSwitch);
-
-    this.idx = idx;
-    this.type = type;
-    this.state = state;
-    this.context = ctx;
-    this.x = null;
-    this.y = null;
-    this.colors = ['black', 'red'];
-  }
-
-  _createClass(BinSwitch, [{
-    key: 'render',
-    value: function render() {
-      var page = this.state.steps[this.type][this.state.page];
-      this.context.fillStyle = this.colors[page[this.idx].step];
-      this.context.fillRect(this.x, this.y, 39, 39);
-      this.context.fillStyle = _constants.COLOR;
-    }
-  }, {
-    key: 'setPos',
-    value: function setPos(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-  }, {
-    key: 'handleClick',
-    value: function handleClick() {
-      var page = this.state.steps[this.type][this.state.page];
-      this.value = (this.value + 1) % 2;
-      this.state.toggleStep(this.idx, this.type, 2);
-      this.context.clearRect(this.x, this.y, 39, 39);
-      this.context.fillStyle = this.colors[page[this.idx].step];
-      this.context.fillRect(this.x, this.y, 39, 39);
-      this.context.fillStyle = _constants.COLOR;
-    }
-  }]);
-
-  return BinSwitch;
-}();
-
-var OctaveSwitch = exports.OctaveSwitch = function () {
-  function OctaveSwitch(idx, type, state, ctx) {
-    _classCallCheck(this, OctaveSwitch);
-
-    this.idx = idx;
-    this.type = type;
-    this.state = state;
-    this.context = ctx;
-    this.x = null;
-    this.y = null;
-    this.colors = ['black', 'red', 'blue'];
-  }
-
-  _createClass(OctaveSwitch, [{
-    key: 'render',
-    value: function render() {
-      var page = this.state.steps[this.type][this.state.page];
-      this.context.fillStyle = this.colors[page[this.idx].step];
-      this.context.fillRect(this.x, this.y, 39, 39);
-      this.context.fillStyle = page[this.idx].hold ? 'green' : 'yellow';
-      this.context.fillRect(this.x, this.y, 10, 10);
-      this.context.fillStyle = _constants.COLOR;
-    }
-  }, {
-    key: 'setPos',
-    value: function setPos(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-  }, {
-    key: 'handleClick',
-    value: function handleClick(x, y, innerX, innerY) {
-      var isHold = innerX <= 10 && innerY <= 10;
-      var page = this.state.steps[this.type][this.state.page];
-      if (isHold) {
-        page[this.idx].hold = !page[this.idx].hold;
-      } else {
-        this.value = (page[this.idx].step + 1) % 3;
-        this.state.toggleStep(this.idx, this.type, 3);
-      }
-      this.context.clearRect(this.x, this.y, 39, 39);
-      this.render();
-    }
-  }]);
-
-  return OctaveSwitch;
-}();
-
-/***/ }),
-/* 5 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -535,7 +363,7 @@ var BeatMarker = function () {
 exports.default = BeatMarker;
 
 /***/ }),
-/* 6 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -595,7 +423,125 @@ var Blinker = function () {
 exports.default = Blinker;
 
 /***/ }),
-/* 7 */
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _synth = __webpack_require__(17);
+
+var _synth2 = _interopRequireDefault(_synth);
+
+var _switch = __webpack_require__(20);
+
+var _note = __webpack_require__(19);
+
+var _note2 = _interopRequireDefault(_note);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var InstrumentWindow = function () {
+  function InstrumentWindow(state, ctx, x, y) {
+    _classCallCheck(this, InstrumentWindow);
+
+    this.x = x;
+    this.y = y;
+    this.parent = state;
+    this.context = ctx;
+    this.instrument = new _synth2.default();
+    this.moduleMap = {};
+    this.build();
+  }
+
+  _createClass(InstrumentWindow, [{
+    key: 'build',
+    value: function build() {
+      for (var i = 0; i < 16; i++) {
+        this.moduleMap[i + '/9'] = new _note2.default(i, this, this.context);
+        this.moduleMap[i + '/10'] = new _switch.OctaveSwitch(i, this, this.context);
+      }
+    }
+  }, {
+    key: 'trigger',
+    value: function trigger(message) {
+      return this.parent.trigger(message);
+    }
+  }, {
+    key: 'getPage',
+    value: function getPage() {
+      return this.trigger({ type: 'get_page', instrument: this.instrument.name });
+    }
+  }, {
+    key: 'renderChildren',
+    value: function renderChildren() {
+      var _this = this;
+
+      Object.keys(this.moduleMap).forEach(function (key) {
+        var _key$split = key.split('/'),
+            _key$split2 = _slicedToArray(_key$split, 2),
+            x = _key$split2[0],
+            y = _key$split2[1];
+
+        x = parseInt(x) * 40;
+        y = parseInt(y) * 40;
+        x += _this.x;
+        y += _this.y;
+        var module = _this.moduleMap[key];
+        if (module.setPos) module.setPos(x, y);
+        module.render();
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      this.context.fillRect(this.x, this.y, 640, 480);
+      this.context.clearRect(this.x + 1, this.y + 1, 638, 478);
+      this.renderChildren();
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick(x, y, innerX, innerY) {
+      var xCell = x - this.x / 40;
+      var yCell = y - this.y / 40;
+      this.moduleMap[xCell + '/' + yCell].handleClick(x, y, innerX, innerY);
+    }
+  }]);
+
+  return InstrumentWindow;
+}();
+
+/*
+    0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+0   . . . . . . . . . . .  .  .  .  .  .  .
+1   . . . . . . . . . . .  .  .  .  .  .  .
+2   . . . . . . . . . . .  .  .  .  .  .  .
+3   . . . . . . . . . . .  .  .  .  .  .  .
+4   . . . . . . . . . . .  .  .  .  .  .  .
+5   . . . . . . . . . . .  .  .  .  .  .  .
+6   . . . . . . . . . . .  .  .  .  .  .  .
+7   . . . . . . . . . . .  .  .  .  .  .  .
+8   . . . . . . . . . . .  .  .  .  .  .  .
+9   . . . . . . . . . . .  .  .  .  .  .  .
+10  . . . . . . . . . . .  .  .  .  .  .  .
+11  . . . . . . . . . . .  .  .  .  .  .  .
+*/
+
+
+exports.default = InstrumentWindow;
+
+/***/ }),
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -643,7 +589,7 @@ var Options = function () {
 exports.default = Options;
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -675,7 +621,7 @@ var PageButton = function () {
     value: function handleClick(x, y) {
       var buttonIdx = x - this.pageOne;
       this.value = buttonIdx;
-      this.state.setPage(this.value);
+      this.state.trigger({ type: 'set_page', page: this.value });
       this.render();
     }
   }, {
@@ -689,9 +635,9 @@ var PageButton = function () {
         this.context.fillRect(this.x + offset, this.y, 40, 40);
         if (i === this.value) {
           this.context.fillStyle = '#999';
-          this.context.fillRect(this.x + offset, this.y, 39, 39);
+          this.context.fillRect(this.x + offset + 1, this.y, 39 - (i === 3 ? 1 : 0), 39);
         } else {
-          this.context.clearRect(this.x + offset, this.y, 39, 39);
+          this.context.clearRect(this.x + offset + 1, this.y, 39 - (i === 3 ? 1 : 0), 39);
         }
         this.context.fillStyle = 'black';
         this.context.fillText(name, this.x + offset + 3, this.y + 25, 80);
@@ -705,7 +651,7 @@ var PageButton = function () {
 exports.default = PageButton;
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -754,7 +700,7 @@ var PlayBtn = function () {
 exports.default = PlayBtn;
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -803,7 +749,7 @@ var PlayBtn = function () {
 exports.default = PlayBtn;
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -854,7 +800,7 @@ var Volume = function () {
 exports.default = Volume;
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -894,7 +840,7 @@ var Word = function () {
 exports.default = Word;
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1093,7 +1039,7 @@ var fmSynth = function (_Listener) {
 exports.default = fmSynth;
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1196,7 +1142,7 @@ function noiseBuffer(context) {
 };
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1292,7 +1238,7 @@ var KickSynth = function (_Listener) {
 exports.default = KickSynth;
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1409,7 +1355,7 @@ var LeadSynth = function (_Listener) {
 exports.default = LeadSynth;
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1534,7 +1480,7 @@ function noiseBuffer(context) {
 };
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1568,6 +1514,7 @@ var KeySynth = function (_Listener) {
 
     var _this = _possibleConstructorReturn(this, (KeySynth.__proto__ || Object.getPrototypeOf(KeySynth)).call(this));
 
+    _this.name = 'bass';
     _this.volume = 8;
     _this.context = ctx;
     _this.oscillators = {};
@@ -1670,53 +1617,51 @@ var KeySynth = function (_Listener) {
 exports.default = KeySynth;
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _state = __webpack_require__(3);
+var _state = __webpack_require__(2);
 
 var _state2 = _interopRequireDefault(_state);
 
-var _switch = __webpack_require__(4);
-
-var _note = __webpack_require__(2);
-
-var _note2 = _interopRequireDefault(_note);
-
-var _PlayBtn = __webpack_require__(9);
+var _PlayBtn = __webpack_require__(8);
 
 var _PlayBtn2 = _interopRequireDefault(_PlayBtn);
 
-var _BeatMarker = __webpack_require__(5);
+var _BeatMarker = __webpack_require__(3);
 
 var _BeatMarker2 = _interopRequireDefault(_BeatMarker);
 
-var _Blinker = __webpack_require__(6);
+var _Blinker = __webpack_require__(4);
 
 var _Blinker2 = _interopRequireDefault(_Blinker);
 
-var _Word = __webpack_require__(12);
+var _Word = __webpack_require__(11);
 
 var _Word2 = _interopRequireDefault(_Word);
 
-var _Options = __webpack_require__(7);
+var _Options = __webpack_require__(6);
 
 var _Options2 = _interopRequireDefault(_Options);
 
-var _PageButton = __webpack_require__(8);
+var _PageButton = __webpack_require__(7);
 
 var _PageButton2 = _interopRequireDefault(_PageButton);
 
-var _Tempo = __webpack_require__(10);
+var _Tempo = __webpack_require__(9);
 
 var _Tempo2 = _interopRequireDefault(_Tempo);
 
-var _Volume = __webpack_require__(11);
+var _Volume = __webpack_require__(10);
 
 var _Volume2 = _interopRequireDefault(_Volume);
+
+var _InstrumentWindow = __webpack_require__(5);
+
+var _InstrumentWindow2 = _interopRequireDefault(_InstrumentWindow);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1727,96 +1672,101 @@ var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 var state = new _state2.default(audioCtx);
 
-for (var i = 0; i < 16; i++) {
-  state.moduleMap[i + 2 + '/12'] = new _switch.OctaveSwitch(i, 'hat', state, ctx);
-  state.moduleMap[i + 2 + '/13'] = new _switch.BinSwitch(i, 'snare', state, ctx);
-  state.moduleMap[i + 2 + '/14'] = new _note2.default(i, 'kick', state, ctx);
-  state.moduleMap[i + 2 + '/15'] = new _switch.BinSwitch(i, 'kick', state, ctx);
-
-  state.moduleMap[i + 2 + '/5'] = new _note2.default(i, 'fm', state, ctx);
-  state.moduleMap[i + 2 + '/6'] = new _switch.OctaveSwitch(i, 'fm', state, ctx);
-  state.moduleMap[i + 2 + '/7'] = new _note2.default(i, 'lead', state, ctx);
-  state.moduleMap[i + 2 + '/8'] = new _switch.OctaveSwitch(i, 'lead', state, ctx);
-  state.moduleMap[i + 2 + '/9'] = new _note2.default(i, 'bass', state, ctx);
-  state.moduleMap[i + 2 + '/10'] = new _switch.OctaveSwitch(i, 'bass', state, ctx);
-
-  state.moduleMap[i + 2 + '/2'] = new _Blinker2.default(i, state, ctx);
-}
+// for(var i = 0; i < 16; i++){
+//   state.moduleMap[`${i+2}/12`] = new OctaveSwitch(i,'hat', state, ctx)
+//   state.moduleMap[`${i+2}/13`] = new BinSwitch(i,'snare', state, ctx)
+//   state.moduleMap[`${i+2}/14`] = new Note(i,'kick', state, ctx)
+//   state.moduleMap[`${i+2}/15`] = new BinSwitch(i,'kick', state, ctx)
+//
+//   state.moduleMap[`${i+2}/5`] = new Note(i,'fm', state, ctx)
+//   state.moduleMap[`${i+2}/6`] = new OctaveSwitch(i,'fm', state, ctx)
+//   state.moduleMap[`${i+2}/7`] = new Note(i,'lead', state, ctx)
+//   state.moduleMap[`${i+2}/8`] = new OctaveSwitch(i,'lead', state, ctx)
+//   state.moduleMap[`${i+2}/9`] = new Note(i,'bass', state, ctx)
+//   state.moduleMap[`${i+2}/10`] = new OctaveSwitch(i,'bass', state, ctx)
+//
+//   state.moduleMap[`${i+2}/2`] = new Blinker(i, state, ctx)
+// }
 /* Play button */
-var playBtn = new _PlayBtn2.default(ctx, state, 0, 0);
+var playBtn = state.push(new _PlayBtn2.default(ctx, state, 0, 0));
 state.blocks['0/0'] = playBtn;
 
 /* Page controls */
-var pageButton = new _PageButton2.default(state, ctx, 2 * 40, 0);
+var pageButton = state.push(new _PageButton2.default(state, ctx, 2 * 40, 0));
 state.blocks['2/0'] = pageButton;
 state.blocks['3/0'] = pageButton;
 state.blocks['4/0'] = pageButton;
 state.blocks['5/0'] = pageButton;
-state.blocks['7/0'] = new _Word2.default('Copy', ctx, 7 * 40, 0, state.copyPage.bind(state));
-state.blocks['8/0'] = new _Word2.default('Paste', ctx, 8 * 40, 0, state.pastePage.bind(state));
+
+state.blocks['7/0'] = state.push(new _Word2.default('Copy', ctx, 7 * 40, 0, function () {
+  return state.message({ type: 'copy_page' });
+}));
+state.blocks['8/0'] = state.push(new _Word2.default('Paste', ctx, 8 * 40, 0, function () {
+  return state.message({ type: 'paste_page' });
+})
 /* Tempo */
-var tempo = new _Tempo2.default(state, ctx, 11 * 40, 0);
+);var tempo = state.push(new _Tempo2.default(state, ctx, 11 * 40, 0));
 state.blocks['11/0'] = tempo;
 state.blocks['12/0'] = tempo;
 
-var toggleSwing = state.toggleSwing.bind(state);
-state.blocks['14/0'] = new _Options2.default(['straight', 'swing'], toggleSwing, ctx, 14 * 40, 0);
-
-/* 4 Beat markers */
-state.blocks['2/16'] = new _BeatMarker2.default(ctx, 2 * 40, 16 * 40);
-state.blocks['6/16'] = new _BeatMarker2.default(ctx, 6 * 40, 16 * 40);
-state.blocks['10/16'] = new _BeatMarker2.default(ctx, 10 * 40, 16 * 40);
-state.blocks['14/16'] = new _BeatMarker2.default(ctx, 14 * 40, 16 * 40);
-/* Instrument names & volume control */
-state.blocks['0/6'] = new _Word2.default('FM', ctx, 0, 6 * 40);
-state.blocks['1/6'] = new _Volume2.default(state, ctx, 1 * 40, 6 * 40, function (value) {
-  state.instruments.fm.setProp({ property: 'volume', value: value });
-});
-state.blocks['0/8'] = new _Word2.default('Lead', ctx, 0, 8 * 40);
-state.blocks['1/8'] = new _Volume2.default(state, ctx, 1 * 40, 8 * 40, function (value) {
-  state.instruments.lead.setProp({ property: 'volume', value: value });
-});
-state.blocks['0/10'] = new _Word2.default('Bass', ctx, 0, 10 * 40);
-state.blocks['1/10'] = new _Volume2.default(state, ctx, 1 * 40, 10 * 40, function (value) {
-  state.instruments.bass.setProp({ property: 'volume', value: value });
-});
-state.blocks['0/15'] = new _Word2.default('Kick', ctx, 0, 15 * 40);
-state.blocks['1/15'] = new _Volume2.default(state, ctx, 1 * 40, 15 * 40, function (value) {
-  state.instruments.kick.setProp({ property: 'volume', value: value });
-});
-state.blocks['0/13'] = new _Word2.default('Snr', ctx, 0, 13 * 40);
-state.blocks['1/13'] = new _Volume2.default(state, ctx, 1 * 40, 13 * 40, function (value) {
-  state.instruments.snare.setProp({ property: 'volume', value: value });
-});
-state.blocks['0/12'] = new _Word2.default('Hat', ctx, 0, 12 * 40);
-state.blocks['1/12'] = new _Volume2.default(state, ctx, 1 * 40, 12 * 40, function (value) {
-  state.instruments.hat.setProp({ property: 'volume', value: value });
-});
-
-var updateKickDecay = function updateKickDecay(value) {
-  return state.instruments.kick.setProp({ property: 'decay', value: value });
+var toggleSwing = function toggleSwing() {
+  return state.message({ type: 'toggle_swing' });
 };
-state.blocks['18/15'] = new _Word2.default('Decay', ctx, 18 * 40, 15 * 40);
-state.blocks['19/15'] = new _Options2.default([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], updateKickDecay, ctx, 19 * 40 + 10, 15 * 40);
+state.blocks['14/0'] = state.push(new _Options2.default(['straight', 'swing'], toggleSwing, ctx, 14 * 40, 0));
 
-var updateLeadDecay = function updateLeadDecay(value) {
-  return state.instruments.lead.setProp({ property: 'decay', value: value });
-};
+var instrumentWindow = state.push(new _InstrumentWindow2.default(state, ctx, 4 * 40, 3 * 40));
+for (var i = 4; i < 12; i++) {
+  for (var k = 3; k < 16; k++) {
+    state.blocks[i + '/' + k] = instrumentWindow;
+  }
+}
 
-state.blocks['18/8'] = new _Word2.default('Decay', ctx, 18 * 40, 8 * 40);
-state.blocks['19/8'] = new _Options2.default([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], updateLeadDecay, ctx, 19 * 40 + 10, 8 * 40);
-
-var updateBassFilter = function updateBassFilter(value) {
-  return state.instruments.bass.setProp({ property: 'filterValue', value: value });
-};
-state.blocks['18/10'] = new _Word2.default('Filter', ctx, 18 * 40, 10 * 40);
-state.blocks['19/10'] = new _Options2.default([0, 1, 2, 3, 4, 5, 6], updateBassFilter, ctx, 19 * 40 + 10, 10 * 40);
-
-var updateLeadWave = function updateLeadWave(value) {
-  return state.instruments.lead.setProp({ property: 'waveform', value: value });
-};
-state.blocks['21/8'] = new _Word2.default('Wave', ctx, 21 * 40, 8 * 40);
-state.blocks['22/8'] = new _Options2.default(['sine', 'square', 'sawtooth'], updateLeadWave, ctx, 22 * 40 + 5, 8 * 40);
+// /* 4 Beat markers */
+// state.blocks['2/16'] = new BeatMarker(ctx, 2*40, 16*40)
+// state.blocks['6/16'] = new BeatMarker(ctx, 6*40, 16*40)
+// state.blocks['10/16'] = new BeatMarker(ctx, 10*40, 16*40)
+// state.blocks['14/16'] = new BeatMarker(ctx, 14*40, 16*40)
+// /* Instrument names & volume control */
+// state.blocks['0/6'] = new Word('FM', ctx, 0, 6*40)
+// state.blocks['1/6'] = new Volume(state, ctx, 1*40, 6*40, (value) => {
+//   state.instruments.fm.setProp({ property: 'volume', value })
+// })
+// state.blocks['0/8'] = new Word('Lead', ctx, 0, 8*40)
+// state.blocks['1/8'] = new Volume(state, ctx, 1*40, 8*40, (value) => {
+//   state.instruments.lead.setProp({ property: 'volume', value })
+// })
+// state.blocks['0/10'] = new Word('Bass', ctx, 0, 10*40)
+// state.blocks['1/10'] = new Volume(state, ctx, 1*40, 10*40, (value) => {
+//   state.instruments.bass.setProp({ property: 'volume', value })
+// })
+// state.blocks['0/15'] = new Word('Kick', ctx, 0, 15*40)
+// state.blocks['1/15'] = new Volume(state, ctx, 1*40, 15*40, (value) => {
+//   state.instruments.kick.setProp({ property: 'volume', value })
+// })
+// state.blocks['0/13'] = new Word('Snr', ctx, 0, 13*40)
+// state.blocks['1/13'] = new Volume(state, ctx, 1*40, 13*40, (value) => {
+//   state.instruments.snare.setProp({ property: 'volume', value })
+// })
+// state.blocks['0/12'] = new Word('Hat', ctx, 0, 12*40)
+// state.blocks['1/12'] = new Volume(state, ctx, 1*40, 12*40, (value) => {
+//   state.instruments.hat.setProp({ property: 'volume', value })
+// })
+//
+// const updateKickDecay = (value) => state.instruments.kick.setProp({ property: 'decay', value })
+// state.blocks['18/15'] = new Word('Decay', ctx, 18*40, 15*40)
+// state.blocks['19/15'] = new Options([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], updateKickDecay, ctx, 19*40+10, 15*40)
+//
+// const updateLeadDecay = (value) => state.instruments.lead.setProp({ property: 'decay', value })
+// state.blocks['18/8'] = new Word('Decay', ctx, 18*40, 8*40)
+// state.blocks['19/8'] = new Options([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], updateLeadDecay, ctx, 19*40+10, 8*40)
+//
+// const updateBassFilter = (value) => state.instruments.bass.setProp({ property: 'filterValue', value })
+// state.blocks['18/10'] = new Word('Filter', ctx, 18*40, 10*40)
+// state.blocks['19/10'] = new Options([0, 1, 2, 3, 4, 5, 6], updateBassFilter, ctx, 19*40+10, 10*40)
+//
+// const updateLeadWave = (value) => state.instruments.lead.setProp({ property: 'waveform', value })
+// state.blocks['21/8'] = new Word('Wave', ctx, 21*40, 8*40)
+// state.blocks['22/8'] = new Options(['sine','square', 'sawtooth'], updateLeadWave, ctx, 22*40+5, 8*40)
 
 canvas.onclick = function (e) {
   var totalOffsetX = 0;
@@ -1849,7 +1799,168 @@ window.onkeydown = function (e) {
   }
 };
 
-state.initScreen();
+state.drawScreen();
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Note = function () {
+  function Note(idx, parent, context) {
+    _classCallCheck(this, Note);
+
+    this.notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'], this.parent = parent;
+    this.context = context;
+    this.idx = idx;
+  }
+
+  _createClass(Note, [{
+    key: 'setPos',
+    value: function setPos(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      this.context.fillStyle = 'black';
+      this.context.fillRect(this.x, this.y, 40, 40);
+      this.context.clearRect(this.x + 1, this.y + 1, 38, 38);
+      var page = this.parent.getPage();
+      var noteIndex = page[this.idx].note;
+      this.context.fillText(this.notes[noteIndex], this.x + 15, this.y + 25, 15);
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick() {
+      var page = this.parent.getPage();
+      page[this.idx].note = page[this.idx].note === 11 ? 0 : page[this.idx].note + 1;
+      this.render();
+    }
+  }]);
+
+  return Note;
+}();
+
+exports.default = Note;
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.OctaveSwitch = exports.BinSwitch = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _constants = __webpack_require__(1);
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BinSwitch = exports.BinSwitch = function () {
+  function BinSwitch(idx, state, ctx) {
+    _classCallCheck(this, BinSwitch);
+
+    this.idx = idx;
+    this.state = state;
+    this.context = ctx;
+    this.x = null;
+    this.y = null;
+    this.colors = ['black', 'red'];
+  }
+
+  _createClass(BinSwitch, [{
+    key: 'render',
+    value: function render() {
+      var page = this.state.getPage();
+      this.context.fillStyle = this.colors[page[this.idx].step];
+      this.context.fillRect(this.x, this.y, 39, 39);
+      this.context.fillStyle = _constants.COLOR;
+    }
+  }, {
+    key: 'setPos',
+    value: function setPos(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick() {
+      var page = this.state.getPage();
+      this.value = (this.value + 1) % 2;
+      page[this.idx].step = this.value;
+      this.context.clearRect(this.x, this.y, 39, 39);
+      this.context.fillStyle = this.colors[page[this.idx].step];
+      this.context.fillRect(this.x, this.y, 39, 39);
+      this.context.fillStyle = _constants.COLOR;
+    }
+  }]);
+
+  return BinSwitch;
+}();
+
+var OctaveSwitch = exports.OctaveSwitch = function () {
+  function OctaveSwitch(idx, state, ctx) {
+    _classCallCheck(this, OctaveSwitch);
+
+    this.idx = idx;
+    this.state = state;
+    this.context = ctx;
+    this.x = null;
+    this.y = null;
+    this.colors = ['black', 'red', 'blue'];
+  }
+
+  _createClass(OctaveSwitch, [{
+    key: 'render',
+    value: function render() {
+      var page = this.state.getPage();
+      this.context.fillStyle = this.colors[page[this.idx].step];
+      this.context.fillRect(this.x, this.y, 39, 39);
+      this.context.fillStyle = page[this.idx].hold ? 'green' : 'yellow';
+      this.context.fillRect(this.x, this.y, 10, 10);
+      this.context.fillStyle = _constants.COLOR;
+    }
+  }, {
+    key: 'setPos',
+    value: function setPos(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick(x, y, innerX, innerY) {
+      var isHold = innerX <= 10 && innerY <= 10;
+      var page = this.state.getPage();
+      if (isHold) {
+        page[this.idx].hold = !page[this.idx].hold;
+      } else {
+        this.value = (page[this.idx].step + 1) % 3;
+        page[this.idx].step = this.value;
+      }
+      this.context.clearRect(this.x, this.y, 39, 39);
+      this.render();
+    }
+  }]);
+
+  return OctaveSwitch;
+}();
 
 /***/ })
 /******/ ]);

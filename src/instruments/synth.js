@@ -3,6 +3,7 @@ import Listener from './Listener'
 export default class KeySynth extends Listener {
   constructor(ctx){
     super()
+    this.name = 'bass'
     this.volume = 8
     this.context = ctx
     this.oscillators = {}
