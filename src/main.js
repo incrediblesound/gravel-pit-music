@@ -7,6 +7,7 @@ import Options from './ui/Options'
 import PageButton from './ui/PageButton'
 import Tempo from './ui/Tempo'
 import Volume from './ui/Volume'
+import Button from './ui/Button'
 import InstrumentWindow from './ui/InstrumentWindow'
 
 const canvas = document.getElementById('synth');
@@ -16,21 +17,20 @@ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 const state = new State(audioCtx)
 
-// for(var i = 0; i < 16; i++){
-//   state.moduleMap[`${i+2}/12`] = new OctaveSwitch(i,'hat', state, ctx)
-//   state.moduleMap[`${i+2}/13`] = new BinSwitch(i,'snare', state, ctx)
-//   state.moduleMap[`${i+2}/14`] = new Note(i,'kick', state, ctx)
-//   state.moduleMap[`${i+2}/15`] = new BinSwitch(i,'kick', state, ctx)
-//
-//   state.moduleMap[`${i+2}/5`] = new Note(i,'fm', state, ctx)
-//   state.moduleMap[`${i+2}/6`] = new OctaveSwitch(i,'fm', state, ctx)
-//   state.moduleMap[`${i+2}/7`] = new Note(i,'lead', state, ctx)
-//   state.moduleMap[`${i+2}/8`] = new OctaveSwitch(i,'lead', state, ctx)
-//   state.moduleMap[`${i+2}/9`] = new Note(i,'bass', state, ctx)
-//   state.moduleMap[`${i+2}/10`] = new OctaveSwitch(i,'bass', state, ctx)
-//
-//   state.moduleMap[`${i+2}/2`] = new Blinker(i, state, ctx)
-// }
+for(var i = 0; i < 16; i++){
+  // state.moduleMap[`${i+2}/12`] = new OctaveSwitch(i,'hat', state, ctx)
+  // state.moduleMap[`${i+2}/13`] = new BinSwitch(i,'snare', state, ctx)
+  // state.moduleMap[`${i+2}/14`] = new Note(i,'kick', state, ctx)
+  // state.moduleMap[`${i+2}/15`] = new BinSwitch(i,'kick', state, ctx)
+  //
+  // state.moduleMap[`${i+2}/5`] = new Note(i,'fm', state, ctx)
+  // state.moduleMap[`${i+2}/6`] = new OctaveSwitch(i,'fm', state, ctx)
+  // state.moduleMap[`${i+2}/7`] = new Note(i,'lead', state, ctx)
+  // state.moduleMap[`${i+2}/8`] = new OctaveSwitch(i,'lead', state, ctx)
+  // state.moduleMap[`${i+2}/9`] = new Note(i,'bass', state, ctx)
+  // state.moduleMap[`${i+2}/10`] = new OctaveSwitch(i,'bass', state, ctx)
+  state.blocks[`${i+2}/14`] = state.push(new Blinker(i, state, ctx))
+}
 /* Play button */
 const playBtn = state.push(new PlayBtn(ctx, state, 0, 0))
 state.blocks['0/0'] = playBtn
@@ -54,10 +54,23 @@ const toggleSwing = () => state.message({ type: 'toggle_swing' })
 state.blocks['14/0'] = state.push(new Options(['straight', 'swing'], toggleSwing, ctx, 14*40, 0))
 
 const instrumentWindow = state.push(new InstrumentWindow(state, ctx, 4*40, 3*40))
-for(let i = 4; i < 12; i++){
+for(let i = 4; i < 20; i++){
   for(let k = 3; k < 16; k++){
     state.blocks[`${i}/${k}`] = instrumentWindow
   }
+}
+
+const instruments = ['fm', 'bass','lead', 'kick', 'snare', 'hat']
+let startX = 4*40
+
+for(let i = 0; i < instruments.length; i++){
+  let btn = new Button(instruments[i], ctx, startX, 80, (on) => {
+    instrumentWindow.setInstrument(instruments[i])
+  })
+  btn.isToggled = () => instrumentWindow.instrument === instruments[i]
+  state.push(btn)
+  state.blocks[`${Math.ceil(startX/40)}/2`] = btn
+  startX = startX + btn.width + 10
 }
 
 // /* 4 Beat markers */

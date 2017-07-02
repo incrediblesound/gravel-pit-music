@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 18);
+/******/ 	return __webpack_require__(__webpack_require__.s = 19);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -122,25 +122,166 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _kick = __webpack_require__(14);
+var _Listener2 = __webpack_require__(0);
+
+var _Listener3 = _interopRequireDefault(_Listener2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var KeySynth = function (_Listener) {
+  _inherits(KeySynth, _Listener);
+
+  function KeySynth(ctx) {
+    _classCallCheck(this, KeySynth);
+
+    var _this = _possibleConstructorReturn(this, (KeySynth.__proto__ || Object.getPrototypeOf(KeySynth)).call(this));
+
+    _this.name = 'bass';
+    _this.volume = 8;
+    _this.context = ctx;
+    _this.oscillators = {};
+    _this.filterValue = 0;
+    _this.playing = false;
+    return _this;
+  }
+
+  _createClass(KeySynth, [{
+    key: 'stopAll',
+    value: function stopAll() {
+      if (!this.oscillators.osc1) return;
+      this.oscillators.gain[0].gain.setTargetAtTime(0, this.context.currentTime + 0.05, 0.1);
+      this.oscillators.gain[1].gain.setTargetAtTime(0, this.context.currentTime + 0.05, 0.1);
+      this.oscillators.gain[2].gain.setTargetAtTime(0, this.context.currentTime + 0.05, 0.1);
+      this.oscillators.osc1.stop(this.context.currentTime + 1);
+      this.oscillators.osc2.stop(this.context.currentTime + 1);
+      this.oscillators.osc3.stop(this.context.currentTime + 1);
+      this.oscillators = {};
+      this.playing = false;
+    }
+  }, {
+    key: 'makeOscillator',
+    value: function makeOscillator(waveform) {
+      var osc = this.context.createOscillator();
+      osc.type = waveform;
+      return osc;
+    }
+  }, {
+    key: 'getOscillators',
+    value: function getOscillators(note, oct) {
+      var _this2 = this;
+
+      var osc1 = this.makeOscillator('triangle');
+      var osc2 = this.makeOscillator('sawtooth');
+      var osc3 = this.makeOscillator('sawtooth');
+      var gain = [this.context.createGain(), this.context.createGain(), this.context.createGain()];
+      var filters = [this.context.createBiquadFilter(), this.context.createBiquadFilter()];
+      filters[0].frequency.value = this.filterValue * 1000;
+      filters[1].frequency.value = this.filterValue * 1000;
+
+      osc1.connect(gain[0]);
+      osc2.connect(filters[0]);
+      osc3.connect(filters[1]);
+      filters[0].connect(gain[1]);
+      filters[1].connect(gain[2]);
+      gain.forEach(function (g) {
+        g.gain.value = _this2.volume * 0.1 - _this2.filterValue * 0.05;
+        g.connect(_this2.context.destination);
+      });
+
+      return [osc1, osc2, osc3, gain, filters];
+    }
+  }, {
+    key: 'play',
+    value: function play(_ref) {
+      var step = _ref.step,
+          note = _ref.note,
+          hold = _ref.hold;
+
+      if (step && !hold) {
+        this.stopAll();
+
+        var _getOscillators = this.getOscillators(note, step),
+            _getOscillators2 = _slicedToArray(_getOscillators, 5),
+            osc1 = _getOscillators2[0],
+            osc2 = _getOscillators2[1],
+            osc3 = _getOscillators2[2],
+            gain = _getOscillators2[3],
+            filters = _getOscillators2[4];
+
+        this.oscillators = {
+          osc1: osc1, osc2: osc2, osc3: osc3,
+          gain: gain, filters: filters
+        };
+        filters[0].frequency.setTargetAtTime(0, this.context.currentTime + 0.02, 0.2);
+        filters[1].frequency.setTargetAtTime(0, this.context.currentTime + 0.02, 0.2);
+        osc1.start();
+        osc2.start();
+        osc3.start();
+        this.playing = true;
+      }
+      if (step && this.playing || hold && step && this.playing && this.oscillators.osc1) {
+        this.oscillators.osc1.frequency.value = 55 * step;
+        this.oscillators.osc2.frequency.value = 55 * step;
+        this.oscillators.osc3.frequency.value = 110 * step;
+        this.oscillators.osc1.detune.value = 99 * note;
+        this.oscillators.osc2.detune.value = 101 * note;
+        this.oscillators.osc3.detune.value = 100 * note;
+      }
+      if (!step) {
+        this.stopAll();
+      }
+    }
+  }]);
+
+  return KeySynth;
+}(_Listener3.default);
+
+exports.default = KeySynth;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _kick = __webpack_require__(16);
 
 var _kick2 = _interopRequireDefault(_kick);
 
-var _leadSynth = __webpack_require__(15);
+var _leadSynth = __webpack_require__(17);
 
 var _leadSynth2 = _interopRequireDefault(_leadSynth);
 
-var _fm = __webpack_require__(12);
+var _synth = __webpack_require__(2);
+
+var _synth2 = _interopRequireDefault(_synth);
+
+var _fm = __webpack_require__(14);
 
 var _fm2 = _interopRequireDefault(_fm);
 
-var _snare = __webpack_require__(16);
+var _snare = __webpack_require__(18);
 
 var _snare2 = _interopRequireDefault(_snare);
 
-var _hat = __webpack_require__(13);
+var _hat = __webpack_require__(15);
 
 var _hat2 = _interopRequireDefault(_hat);
 
@@ -169,7 +310,7 @@ var State = function () {
     this.tempo = 120;
     this.page = 0;
     this.blocks = {};
-    this.moduleMap = {};
+    this.blinkers = [];
     this.children = [];
     this.steps = {
       bass: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
@@ -180,17 +321,16 @@ var State = function () {
       hat: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)]
     };
     this.copyBuffer = { notes: {}, steps: {} };
-    this.blinkers = [];
     this.step = 0;
     this.context = audioCtx;
-    // this.instruments = {
-    //   bass: new BassSynth(audioCtx),
-    //   kick: new KickSynth(audioCtx),
-    //   snare: new Snare(audioCtx),
-    //   fm: new fm(audioCtx),
-    //   lead: new LeadSynth(audioCtx),
-    //   hat: new Hat(audioCtx)
-    // }
+    this.instruments = {
+      bass: new _synth2.default(audioCtx),
+      kick: new _kick2.default(audioCtx),
+      snare: new _snare2.default(audioCtx),
+      fm: new _fm2.default(audioCtx),
+      lead: new _leadSynth2.default(audioCtx),
+      hat: new _hat2.default(audioCtx)
+    };
   }
 
   _createClass(State, [{
@@ -269,9 +409,9 @@ var State = function () {
       while (this.noteTime < currentTime + 0.200) {
         var contextPlayTime = this.noteTime + this.startTime;
         this.blinkers[this.rhythmIndex].toggle();
-        if (this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle
+        if (this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle();
         /* for each instrument pass the step object for this page and beat into the play method */
-        ();Object.keys(this.steps).forEach(function (type) {
+        Object.keys(this.steps).forEach(function (type) {
           _this3.instruments[type].play(_this3.steps[type][_this3.page][_this3.rhythmIndex]);
         });
         this.advanceNote();
@@ -322,7 +462,7 @@ var State = function () {
 exports.default = State;
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -363,7 +503,7 @@ var BeatMarker = function () {
 exports.default = BeatMarker;
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -423,7 +563,64 @@ var Blinker = function () {
 exports.default = Blinker;
 
 /***/ }),
-/* 5 */
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Button = function () {
+  function Button(text, ctx, x, y, handleClick) {
+    _classCallCheck(this, Button);
+
+    this.x = x;
+    this.y = y;
+    this.text = text;
+    this.width = Math.ceil(ctx.measureText(text).width);
+    this.toggled = false;
+    this.context = ctx;
+    this.callBack = handleClick;
+  }
+
+  _createClass(Button, [{
+    key: 'handleClick',
+    value: function handleClick(x, y) {
+      this.toggled = !this.toggled;
+      this.callBack(this.toggled);
+      this.render();
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      this.context.clearRect(this.x, this.y, this.width + 10, 40);
+      this.context.fillStyle = 'black';
+      this.context.fillRect(this.x, this.y, this.width + 10, 40);
+      if (this.isToggled ? this.isToggled() : this.toggled) {
+        this.context.fillStyle = '#999';
+        this.context.fillRect(this.x + 1, this.y, this.width + 9, 39);
+      } else {
+        this.context.clearRect(this.x + 1, this.y, this.width + 9, 39);
+      }
+      this.context.fillStyle = 'black';
+      this.context.fillText(this.text, this.x + 5, this.y + 25, this.width + 3);
+    }
+  }]);
+
+  return Button;
+}();
+
+exports.default = Button;
+
+/***/ }),
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -437,13 +634,13 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _synth = __webpack_require__(17);
+var _synth = __webpack_require__(2);
 
 var _synth2 = _interopRequireDefault(_synth);
 
-var _switch = __webpack_require__(20);
+var _switch = __webpack_require__(21);
 
-var _note = __webpack_require__(19);
+var _note = __webpack_require__(20);
 
 var _note2 = _interopRequireDefault(_note);
 
@@ -459,7 +656,7 @@ var InstrumentWindow = function () {
     this.y = y;
     this.parent = state;
     this.context = ctx;
-    this.instrument = new _synth2.default();
+    this.instrument = 'bass';
     this.moduleMap = {};
     this.build();
   }
@@ -478,9 +675,15 @@ var InstrumentWindow = function () {
       return this.parent.trigger(message);
     }
   }, {
+    key: 'setInstrument',
+    value: function setInstrument(instrument) {
+      this.instrument = instrument;
+      this.parent.drawScreen();
+    }
+  }, {
     key: 'getPage',
     value: function getPage() {
-      return this.trigger({ type: 'get_page', instrument: this.instrument.name });
+      return this.trigger({ type: 'get_page', instrument: this.instrument });
     }
   }, {
     key: 'renderChildren',
@@ -514,7 +717,8 @@ var InstrumentWindow = function () {
     value: function handleClick(x, y, innerX, innerY) {
       var xCell = x - this.x / 40;
       var yCell = y - this.y / 40;
-      this.moduleMap[xCell + '/' + yCell].handleClick(x, y, innerX, innerY);
+      var module = this.moduleMap[xCell + '/' + yCell];
+      if (module) module.handleClick(x, y, innerX, innerY);
     }
   }]);
 
@@ -541,7 +745,7 @@ var InstrumentWindow = function () {
 exports.default = InstrumentWindow;
 
 /***/ }),
-/* 6 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -589,7 +793,7 @@ var Options = function () {
 exports.default = Options;
 
 /***/ }),
-/* 7 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -651,7 +855,7 @@ var PageButton = function () {
 exports.default = PageButton;
 
 /***/ }),
-/* 8 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -700,7 +904,7 @@ var PlayBtn = function () {
 exports.default = PlayBtn;
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -749,7 +953,7 @@ var PlayBtn = function () {
 exports.default = PlayBtn;
 
 /***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -800,7 +1004,7 @@ var Volume = function () {
 exports.default = Volume;
 
 /***/ }),
-/* 11 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -840,7 +1044,7 @@ var Word = function () {
 exports.default = Word;
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1039,7 +1243,7 @@ var fmSynth = function (_Listener) {
 exports.default = fmSynth;
 
 /***/ }),
-/* 13 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1142,7 +1346,7 @@ function noiseBuffer(context) {
 };
 
 /***/ }),
-/* 14 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1238,7 +1442,7 @@ var KickSynth = function (_Listener) {
 exports.default = KickSynth;
 
 /***/ }),
-/* 15 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1355,7 +1559,7 @@ var LeadSynth = function (_Listener) {
 exports.default = LeadSynth;
 
 /***/ }),
-/* 16 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1480,186 +1684,53 @@ function noiseBuffer(context) {
 };
 
 /***/ }),
-/* 17 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Listener2 = __webpack_require__(0);
-
-var _Listener3 = _interopRequireDefault(_Listener2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var KeySynth = function (_Listener) {
-  _inherits(KeySynth, _Listener);
-
-  function KeySynth(ctx) {
-    _classCallCheck(this, KeySynth);
-
-    var _this = _possibleConstructorReturn(this, (KeySynth.__proto__ || Object.getPrototypeOf(KeySynth)).call(this));
-
-    _this.name = 'bass';
-    _this.volume = 8;
-    _this.context = ctx;
-    _this.oscillators = {};
-    _this.filterValue = 0;
-    _this.playing = false;
-    return _this;
-  }
-
-  _createClass(KeySynth, [{
-    key: 'stopAll',
-    value: function stopAll() {
-      if (!this.oscillators.osc1) return;
-      this.oscillators.gain[0].gain.setTargetAtTime(0, this.context.currentTime + 0.05, 0.1);
-      this.oscillators.gain[1].gain.setTargetAtTime(0, this.context.currentTime + 0.05, 0.1);
-      this.oscillators.gain[2].gain.setTargetAtTime(0, this.context.currentTime + 0.05, 0.1);
-      this.oscillators.osc1.stop(this.context.currentTime + 1);
-      this.oscillators.osc2.stop(this.context.currentTime + 1);
-      this.oscillators.osc3.stop(this.context.currentTime + 1);
-      this.oscillators = {};
-      this.playing = false;
-    }
-  }, {
-    key: 'makeOscillator',
-    value: function makeOscillator(waveform) {
-      var osc = this.context.createOscillator();
-      osc.type = waveform;
-      return osc;
-    }
-  }, {
-    key: 'getOscillators',
-    value: function getOscillators(note, oct) {
-      var _this2 = this;
-
-      var osc1 = this.makeOscillator('triangle');
-      var osc2 = this.makeOscillator('sawtooth');
-      var osc3 = this.makeOscillator('sawtooth');
-      var gain = [this.context.createGain(), this.context.createGain(), this.context.createGain()];
-      var filters = [this.context.createBiquadFilter(), this.context.createBiquadFilter()];
-      filters[0].frequency.value = this.filterValue * 1000;
-      filters[1].frequency.value = this.filterValue * 1000;
-
-      osc1.connect(gain[0]);
-      osc2.connect(filters[0]);
-      osc3.connect(filters[1]);
-      filters[0].connect(gain[1]);
-      filters[1].connect(gain[2]);
-      gain.forEach(function (g) {
-        g.gain.value = _this2.volume * 0.1 - _this2.filterValue * 0.05;
-        g.connect(_this2.context.destination);
-      });
-
-      return [osc1, osc2, osc3, gain, filters];
-    }
-  }, {
-    key: 'play',
-    value: function play(_ref) {
-      var step = _ref.step,
-          note = _ref.note,
-          hold = _ref.hold;
-
-      if (step && !hold) {
-        this.stopAll();
-
-        var _getOscillators = this.getOscillators(note, step),
-            _getOscillators2 = _slicedToArray(_getOscillators, 5),
-            osc1 = _getOscillators2[0],
-            osc2 = _getOscillators2[1],
-            osc3 = _getOscillators2[2],
-            gain = _getOscillators2[3],
-            filters = _getOscillators2[4];
-
-        this.oscillators = {
-          osc1: osc1, osc2: osc2, osc3: osc3,
-          gain: gain, filters: filters
-        };
-        filters[0].frequency.setTargetAtTime(0, this.context.currentTime + 0.02, 0.2);
-        filters[1].frequency.setTargetAtTime(0, this.context.currentTime + 0.02, 0.2);
-        osc1.start();
-        osc2.start();
-        osc3.start();
-        this.playing = true;
-      }
-      if (step && this.playing || hold && step && this.playing && this.oscillators.osc1) {
-        this.oscillators.osc1.frequency.value = 55 * step;
-        this.oscillators.osc2.frequency.value = 55 * step;
-        this.oscillators.osc3.frequency.value = 110 * step;
-        this.oscillators.osc1.detune.value = 99 * note;
-        this.oscillators.osc2.detune.value = 101 * note;
-        this.oscillators.osc3.detune.value = 100 * note;
-      }
-      if (!step) {
-        this.stopAll();
-      }
-    }
-  }]);
-
-  return KeySynth;
-}(_Listener3.default);
-
-exports.default = KeySynth;
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _state = __webpack_require__(2);
+var _state = __webpack_require__(3);
 
 var _state2 = _interopRequireDefault(_state);
 
-var _PlayBtn = __webpack_require__(8);
+var _PlayBtn = __webpack_require__(10);
 
 var _PlayBtn2 = _interopRequireDefault(_PlayBtn);
 
-var _BeatMarker = __webpack_require__(3);
+var _BeatMarker = __webpack_require__(4);
 
 var _BeatMarker2 = _interopRequireDefault(_BeatMarker);
 
-var _Blinker = __webpack_require__(4);
+var _Blinker = __webpack_require__(5);
 
 var _Blinker2 = _interopRequireDefault(_Blinker);
 
-var _Word = __webpack_require__(11);
+var _Word = __webpack_require__(13);
 
 var _Word2 = _interopRequireDefault(_Word);
 
-var _Options = __webpack_require__(6);
+var _Options = __webpack_require__(8);
 
 var _Options2 = _interopRequireDefault(_Options);
 
-var _PageButton = __webpack_require__(7);
+var _PageButton = __webpack_require__(9);
 
 var _PageButton2 = _interopRequireDefault(_PageButton);
 
-var _Tempo = __webpack_require__(9);
+var _Tempo = __webpack_require__(11);
 
 var _Tempo2 = _interopRequireDefault(_Tempo);
 
-var _Volume = __webpack_require__(10);
+var _Volume = __webpack_require__(12);
 
 var _Volume2 = _interopRequireDefault(_Volume);
 
-var _InstrumentWindow = __webpack_require__(5);
+var _Button = __webpack_require__(6);
+
+var _Button2 = _interopRequireDefault(_Button);
+
+var _InstrumentWindow = __webpack_require__(7);
 
 var _InstrumentWindow2 = _interopRequireDefault(_InstrumentWindow);
 
@@ -1672,21 +1743,20 @@ var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 var state = new _state2.default(audioCtx);
 
-// for(var i = 0; i < 16; i++){
-//   state.moduleMap[`${i+2}/12`] = new OctaveSwitch(i,'hat', state, ctx)
-//   state.moduleMap[`${i+2}/13`] = new BinSwitch(i,'snare', state, ctx)
-//   state.moduleMap[`${i+2}/14`] = new Note(i,'kick', state, ctx)
-//   state.moduleMap[`${i+2}/15`] = new BinSwitch(i,'kick', state, ctx)
-//
-//   state.moduleMap[`${i+2}/5`] = new Note(i,'fm', state, ctx)
-//   state.moduleMap[`${i+2}/6`] = new OctaveSwitch(i,'fm', state, ctx)
-//   state.moduleMap[`${i+2}/7`] = new Note(i,'lead', state, ctx)
-//   state.moduleMap[`${i+2}/8`] = new OctaveSwitch(i,'lead', state, ctx)
-//   state.moduleMap[`${i+2}/9`] = new Note(i,'bass', state, ctx)
-//   state.moduleMap[`${i+2}/10`] = new OctaveSwitch(i,'bass', state, ctx)
-//
-//   state.moduleMap[`${i+2}/2`] = new Blinker(i, state, ctx)
-// }
+for (var i = 0; i < 16; i++) {
+  // state.moduleMap[`${i+2}/12`] = new OctaveSwitch(i,'hat', state, ctx)
+  // state.moduleMap[`${i+2}/13`] = new BinSwitch(i,'snare', state, ctx)
+  // state.moduleMap[`${i+2}/14`] = new Note(i,'kick', state, ctx)
+  // state.moduleMap[`${i+2}/15`] = new BinSwitch(i,'kick', state, ctx)
+  //
+  // state.moduleMap[`${i+2}/5`] = new Note(i,'fm', state, ctx)
+  // state.moduleMap[`${i+2}/6`] = new OctaveSwitch(i,'fm', state, ctx)
+  // state.moduleMap[`${i+2}/7`] = new Note(i,'lead', state, ctx)
+  // state.moduleMap[`${i+2}/8`] = new OctaveSwitch(i,'lead', state, ctx)
+  // state.moduleMap[`${i+2}/9`] = new Note(i,'bass', state, ctx)
+  // state.moduleMap[`${i+2}/10`] = new OctaveSwitch(i,'bass', state, ctx)
+  state.blocks[i + 2 + '/14'] = state.push(new _Blinker2.default(i, state, ctx));
+}
 /* Play button */
 var playBtn = state.push(new _PlayBtn2.default(ctx, state, 0, 0));
 state.blocks['0/0'] = playBtn;
@@ -1703,9 +1773,9 @@ state.blocks['7/0'] = state.push(new _Word2.default('Copy', ctx, 7 * 40, 0, func
 }));
 state.blocks['8/0'] = state.push(new _Word2.default('Paste', ctx, 8 * 40, 0, function () {
   return state.message({ type: 'paste_page' });
-})
+}));
 /* Tempo */
-);var tempo = state.push(new _Tempo2.default(state, ctx, 11 * 40, 0));
+var tempo = state.push(new _Tempo2.default(state, ctx, 11 * 40, 0));
 state.blocks['11/0'] = tempo;
 state.blocks['12/0'] = tempo;
 
@@ -1715,10 +1785,29 @@ var toggleSwing = function toggleSwing() {
 state.blocks['14/0'] = state.push(new _Options2.default(['straight', 'swing'], toggleSwing, ctx, 14 * 40, 0));
 
 var instrumentWindow = state.push(new _InstrumentWindow2.default(state, ctx, 4 * 40, 3 * 40));
-for (var i = 4; i < 12; i++) {
+for (var _i = 4; _i < 20; _i++) {
   for (var k = 3; k < 16; k++) {
-    state.blocks[i + '/' + k] = instrumentWindow;
+    state.blocks[_i + '/' + k] = instrumentWindow;
   }
+}
+
+var instruments = ['fm', 'bass', 'lead', 'kick', 'snare', 'hat'];
+var startX = 4 * 40;
+
+var _loop = function _loop(_i2) {
+  var btn = new _Button2.default(instruments[_i2], ctx, startX, 80, function (on) {
+    instrumentWindow.setInstrument(instruments[_i2]);
+  });
+  btn.isToggled = function () {
+    return instrumentWindow.instrument === instruments[_i2];
+  };
+  state.push(btn);
+  state.blocks[Math.ceil(startX / 40) + '/2'] = btn;
+  startX = startX + btn.width + 10;
+};
+
+for (var _i2 = 0; _i2 < instruments.length; _i2++) {
+  _loop(_i2);
 }
 
 // /* 4 Beat markers */
@@ -1802,7 +1891,7 @@ window.onkeydown = function (e) {
 state.drawScreen();
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1856,7 +1945,7 @@ var Note = function () {
 exports.default = Note;
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

@@ -8,7 +8,7 @@ export default class InstrumentWindow {
     this.y = y
     this.parent = state
     this.context = ctx
-    this.instrument = new BassSynth()
+    this.instrument = 'bass'
     this.moduleMap = {}
     this.build()
   }
@@ -21,8 +21,12 @@ export default class InstrumentWindow {
   trigger(message){
     return this.parent.trigger(message)
   }
+  setInstrument(instrument){
+    this.instrument = instrument
+    this.parent.drawScreen()
+  }
   getPage(){
-    return this.trigger({ type: 'get_page', instrument: this.instrument.name })
+    return this.trigger({ type: 'get_page', instrument: this.instrument })
   }
   renderChildren(){
     Object.keys(this.moduleMap).forEach(key => {
@@ -44,7 +48,8 @@ export default class InstrumentWindow {
   handleClick(x, y, innerX, innerY){
     let xCell = x - (this.x/40)
     let yCell = y - (this.y/40)
-    this.moduleMap[`${xCell}/${yCell}`].handleClick(x, y, innerX, innerY)
+    let module = this.moduleMap[`${xCell}/${yCell}`]
+    if(module) module.handleClick(x, y, innerX, innerY)
   }
 }
 

@@ -1,5 +1,5 @@
 {
-  "name": "Gravel Pit Music Production Center",
+  "name": "gravel-pit-music",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
@@ -15,5 +15,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "MIT"
 }

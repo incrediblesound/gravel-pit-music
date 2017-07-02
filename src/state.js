@@ -1,5 +1,6 @@
 import KickSynth from './instruments/kick'
 import LeadSynth from './instruments/leadSynth'
+import BassSynth from './instruments/synth'
 import fm from './instruments/fm'
 import Snare from './instruments/snare'
 import Hat from './instruments/hat'
@@ -20,7 +21,7 @@ export default class State {
     this.tempo = 120
     this.page = 0
     this.blocks = {}
-    this.moduleMap = {}
+    this.blinkers = []
     this.children = []
     this.steps = {
       bass: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
