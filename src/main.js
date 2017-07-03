@@ -49,7 +49,7 @@ const tempo = state.push(new Tempo(state, ctx, 11*40, 0))
 state.blocks['11/0'] = tempo
 state.blocks['12/0'] = tempo
 
-const toggleSwing = () => state.message({ type: 'toggle_swing' })
+const toggleSwing = () => state.trigger({ type: 'toggle_swing' })
 state.blocks['14/0'] = state.push(new Options(['straight', 'swing'], toggleSwing, ctx, 14*40, 0))
 
 const instrumentWindow = state.push(new InstrumentWindow(state, ctx, 4*40, 3*40))

@@ -25,6 +25,7 @@ export default class Button {
         this.context.clearRect(this.x+1, this.y+1, this.width-2, 39)
       }
       this.context.fillStyle = 'black'
-      this.context.fillText(this.text, this.x+5, this.y+25, this.width+3);
+      const wordMargin = (this.width/2)-(this.textWidth/2)
+      this.context.fillText(this.text, this.x+wordMargin, this.y+25, this.width+3);
   }
 }
