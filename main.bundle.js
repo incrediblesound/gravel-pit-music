@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 19);
+/******/ 	return __webpack_require__(__webpack_require__.s = 18);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -261,11 +261,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _kick = __webpack_require__(16);
+var _kick = __webpack_require__(15);
 
 var _kick2 = _interopRequireDefault(_kick);
 
-var _leadSynth = __webpack_require__(17);
+var _leadSynth = __webpack_require__(16);
 
 var _leadSynth2 = _interopRequireDefault(_leadSynth);
 
@@ -273,15 +273,15 @@ var _synth = __webpack_require__(2);
 
 var _synth2 = _interopRequireDefault(_synth);
 
-var _fm = __webpack_require__(14);
+var _fm = __webpack_require__(13);
 
 var _fm2 = _interopRequireDefault(_fm);
 
-var _snare = __webpack_require__(18);
+var _snare = __webpack_require__(17);
 
 var _snare2 = _interopRequireDefault(_snare);
 
-var _hat = __webpack_require__(15);
+var _hat = __webpack_require__(14);
 
 var _hat2 = _interopRequireDefault(_hat);
 
@@ -517,66 +517,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Blinker = function () {
-  function Blinker(i, state, ctx) {
-    _classCallCheck(this, Blinker);
-
-    this.context = ctx;
-    state.blinkers[i] = this;
-  }
-
-  _createClass(Blinker, [{
-    key: 'render',
-    value: function render() {
-      if (this.on) {
-        this.context.beginPath();
-        this.context.arc(this.x + 20, this.y + 20, 8, 0, 2 * Math.PI, false);
-        this.context.fillStyle = 'red';
-        this.context.fill();
-        this.context.lineWidth = 1;
-        this.context.strokeStyle = '#003300';
-        this.context.stroke();
-      } else {
-        this.context.clearRect(this.x, this.y, 40, 40);
-      }
-    }
-  }, {
-    key: 'setPos',
-    value: function setPos(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-  }, {
-    key: 'handleClick',
-    value: function handleClick() {}
-  }, {
-    key: 'toggle',
-    value: function toggle() {
-      this.on = !this.on;
-      this.render();
-    }
-  }]);
-
-  return Blinker;
-}();
-
-exports.default = Blinker;
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 var Button = function () {
   function Button(text, ctx, x, y, handleClick) {
     _classCallCheck(this, Button);
@@ -584,7 +524,8 @@ var Button = function () {
     this.x = x;
     this.y = y;
     this.text = text;
-    this.width = Math.ceil(ctx.measureText(text).width);
+    this.textWidth = Math.ceil(ctx.measureText(text).width);
+    this.width = Math.ceil((this.textWidth + 10) / 40) * 40;
     this.toggled = false;
     this.context = ctx;
     this.callBack = handleClick;
@@ -600,14 +541,14 @@ var Button = function () {
   }, {
     key: 'render',
     value: function render() {
-      this.context.clearRect(this.x, this.y, this.width + 10, 40);
+      this.context.clearRect(this.x, this.y, this.width, 40);
       this.context.fillStyle = 'black';
-      this.context.fillRect(this.x, this.y, this.width + 10, 40);
+      this.context.fillRect(this.x, this.y, this.width, 40);
       if (this.isToggled ? this.isToggled() : this.toggled) {
         this.context.fillStyle = '#999';
-        this.context.fillRect(this.x + 1, this.y, this.width + 9, 39);
+        this.context.fillRect(this.x + 1, this.y, this.width - 2, 39);
       } else {
-        this.context.clearRect(this.x + 1, this.y, this.width + 9, 39);
+        this.context.clearRect(this.x + 1, this.y + 1, this.width - 2, 39);
       }
       this.context.fillStyle = 'black';
       this.context.fillText(this.text, this.x + 5, this.y + 25, this.width + 3);
@@ -620,7 +561,7 @@ var Button = function () {
 exports.default = Button;
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -639,6 +580,10 @@ var _synth = __webpack_require__(2);
 var _synth2 = _interopRequireDefault(_synth);
 
 var _switch = __webpack_require__(21);
+
+var _Blinker = __webpack_require__(19);
+
+var _Blinker2 = _interopRequireDefault(_Blinker);
 
 var _note = __webpack_require__(20);
 
@@ -667,6 +612,7 @@ var InstrumentWindow = function () {
       for (var i = 0; i < 16; i++) {
         this.moduleMap[i + '/9'] = new _note2.default(i, this, this.context);
         this.moduleMap[i + '/10'] = new _switch.OctaveSwitch(i, this, this.context);
+        this.moduleMap[i + '/11'] = new _Blinker2.default(i, this.parent, this.context);
       }
     }
   }, {
@@ -745,7 +691,7 @@ var InstrumentWindow = function () {
 exports.default = InstrumentWindow;
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -793,7 +739,7 @@ var Options = function () {
 exports.default = Options;
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -855,7 +801,7 @@ var PageButton = function () {
 exports.default = PageButton;
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -904,7 +850,7 @@ var PlayBtn = function () {
 exports.default = PlayBtn;
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -953,7 +899,7 @@ var PlayBtn = function () {
 exports.default = PlayBtn;
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1004,7 +950,7 @@ var Volume = function () {
 exports.default = Volume;
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1044,7 +990,7 @@ var Word = function () {
 exports.default = Word;
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1243,7 +1189,7 @@ var fmSynth = function (_Listener) {
 exports.default = fmSynth;
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1346,7 +1292,7 @@ function noiseBuffer(context) {
 };
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1442,7 +1388,7 @@ var KickSynth = function (_Listener) {
 exports.default = KickSynth;
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1559,7 +1505,7 @@ var LeadSynth = function (_Listener) {
 exports.default = LeadSynth;
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1684,7 +1630,7 @@ function noiseBuffer(context) {
 };
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1694,7 +1640,7 @@ var _state = __webpack_require__(3);
 
 var _state2 = _interopRequireDefault(_state);
 
-var _PlayBtn = __webpack_require__(10);
+var _PlayBtn = __webpack_require__(9);
 
 var _PlayBtn2 = _interopRequireDefault(_PlayBtn);
 
@@ -1702,35 +1648,31 @@ var _BeatMarker = __webpack_require__(4);
 
 var _BeatMarker2 = _interopRequireDefault(_BeatMarker);
 
-var _Blinker = __webpack_require__(5);
-
-var _Blinker2 = _interopRequireDefault(_Blinker);
-
-var _Word = __webpack_require__(13);
+var _Word = __webpack_require__(12);
 
 var _Word2 = _interopRequireDefault(_Word);
 
-var _Options = __webpack_require__(8);
+var _Options = __webpack_require__(7);
 
 var _Options2 = _interopRequireDefault(_Options);
 
-var _PageButton = __webpack_require__(9);
+var _PageButton = __webpack_require__(8);
 
 var _PageButton2 = _interopRequireDefault(_PageButton);
 
-var _Tempo = __webpack_require__(11);
+var _Tempo = __webpack_require__(10);
 
 var _Tempo2 = _interopRequireDefault(_Tempo);
 
-var _Volume = __webpack_require__(12);
+var _Volume = __webpack_require__(11);
 
 var _Volume2 = _interopRequireDefault(_Volume);
 
-var _Button = __webpack_require__(6);
+var _Button = __webpack_require__(5);
 
 var _Button2 = _interopRequireDefault(_Button);
 
-var _InstrumentWindow = __webpack_require__(7);
+var _InstrumentWindow = __webpack_require__(6);
 
 var _InstrumentWindow2 = _interopRequireDefault(_InstrumentWindow);
 
@@ -1743,20 +1685,20 @@ var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 var state = new _state2.default(audioCtx);
 
-for (var i = 0; i < 16; i++) {
-  // state.moduleMap[`${i+2}/12`] = new OctaveSwitch(i,'hat', state, ctx)
-  // state.moduleMap[`${i+2}/13`] = new BinSwitch(i,'snare', state, ctx)
-  // state.moduleMap[`${i+2}/14`] = new Note(i,'kick', state, ctx)
-  // state.moduleMap[`${i+2}/15`] = new BinSwitch(i,'kick', state, ctx)
-  //
-  // state.moduleMap[`${i+2}/5`] = new Note(i,'fm', state, ctx)
-  // state.moduleMap[`${i+2}/6`] = new OctaveSwitch(i,'fm', state, ctx)
-  // state.moduleMap[`${i+2}/7`] = new Note(i,'lead', state, ctx)
-  // state.moduleMap[`${i+2}/8`] = new OctaveSwitch(i,'lead', state, ctx)
-  // state.moduleMap[`${i+2}/9`] = new Note(i,'bass', state, ctx)
-  // state.moduleMap[`${i+2}/10`] = new OctaveSwitch(i,'bass', state, ctx)
-  state.blocks[i + 2 + '/14'] = state.push(new _Blinker2.default(i, state, ctx));
-}
+for (var i = 0; i < 16; i++) {}
+// state.moduleMap[`${i+2}/12`] = new OctaveSwitch(i,'hat', state, ctx)
+// state.moduleMap[`${i+2}/13`] = new BinSwitch(i,'snare', state, ctx)
+// state.moduleMap[`${i+2}/14`] = new Note(i,'kick', state, ctx)
+// state.moduleMap[`${i+2}/15`] = new BinSwitch(i,'kick', state, ctx)
+//
+// state.moduleMap[`${i+2}/5`] = new Note(i,'fm', state, ctx)
+// state.moduleMap[`${i+2}/6`] = new OctaveSwitch(i,'fm', state, ctx)
+// state.moduleMap[`${i+2}/7`] = new Note(i,'lead', state, ctx)
+// state.moduleMap[`${i+2}/8`] = new OctaveSwitch(i,'lead', state, ctx)
+// state.moduleMap[`${i+2}/9`] = new Note(i,'bass', state, ctx)
+// state.moduleMap[`${i+2}/10`] = new OctaveSwitch(i,'bass', state, ctx)
+// state.blocks[`${i+2}/14`] = state.push(new Blinker(i, state, ctx))
+
 /* Play button */
 var playBtn = state.push(new _PlayBtn2.default(ctx, state, 0, 0));
 state.blocks['0/0'] = playBtn;
@@ -1802,8 +1744,10 @@ var _loop = function _loop(_i2) {
     return instrumentWindow.instrument === instruments[_i2];
   };
   state.push(btn);
-  state.blocks[Math.ceil(startX / 40) + '/2'] = btn;
-  startX = startX + btn.width + 10;
+  for (var _k = 0; _k <= Math.floor(btn.width / 40); _k++) {
+    state.blocks[Math.ceil(startX / 40) + _k + '/2'] = btn;
+  }
+  startX = startX + btn.width;
 };
 
 for (var _i2 = 0; _i2 < instruments.length; _i2++) {
@@ -1889,6 +1833,72 @@ window.onkeydown = function (e) {
 };
 
 state.drawScreen();
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Blinker = function () {
+  function Blinker(i, state, ctx) {
+    _classCallCheck(this, Blinker);
+
+    this.context = ctx;
+    state.blinkers[i] = this;
+    this.idx = i;
+  }
+
+  _createClass(Blinker, [{
+    key: 'render',
+    value: function render() {
+      if (this.on || this.idx % 4 === 0) {
+        this.drawCircle();
+      } else {
+        this.context.clearRect(this.x - 1, this.y - 1, 39, 39);
+      }
+    }
+  }, {
+    key: 'drawCircle',
+    value: function drawCircle() {
+      this.context.beginPath();
+      this.context.arc(this.x + 20, this.y + 20, 8, 0, 2 * Math.PI, false);
+      this.context.fillStyle = this.idx % 4 ? 'red' : 'blue';
+      this.context.fill();
+      this.context.lineWidth = 1;
+      this.context.strokeStyle = '#003300';
+      this.context.stroke();
+    }
+  }, {
+    key: 'setPos',
+    value: function setPos(x, y) {
+      this.x = x;
+      this.y = y;
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick() {}
+  }, {
+    key: 'toggle',
+    value: function toggle() {
+      this.on = !this.on;
+      this.render();
+    }
+  }]);
+
+  return Blinker;
+}();
+
+exports.default = Blinker;
 
 /***/ }),
 /* 20 */

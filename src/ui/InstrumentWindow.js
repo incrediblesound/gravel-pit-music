@@ -1,5 +1,6 @@
 import BassSynth from '../instruments/synth'
 import { BinSwitch, OctaveSwitch } from './switch'
+import Blinker from './Blinker'
 import Note from './note'
 
 export default class InstrumentWindow {
@@ -16,6 +17,7 @@ export default class InstrumentWindow {
     for(var i = 0; i < 16; i++){
       this.moduleMap[`${i}/9`] = new Note(i, this, this.context)
       this.moduleMap[`${i}/10`] = new OctaveSwitch(i, this, this.context)
+      this.moduleMap[`${i}/11`] = new Blinker(i, this.parent, this.context)
     }
   }
   trigger(message){

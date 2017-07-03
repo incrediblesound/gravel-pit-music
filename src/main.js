@@ -1,7 +1,6 @@
 import State from './state'
 import PlayBtn from './ui/PlayBtn'
 import BeatMarker from './ui/BeatMarker'
-import Blinker from './ui/Blinker'
 import Word from './ui/Word'
 import Options from './ui/Options'
 import PageButton from './ui/PageButton'
@@ -29,7 +28,7 @@ for(var i = 0; i < 16; i++){
   // state.moduleMap[`${i+2}/8`] = new OctaveSwitch(i,'lead', state, ctx)
   // state.moduleMap[`${i+2}/9`] = new Note(i,'bass', state, ctx)
   // state.moduleMap[`${i+2}/10`] = new OctaveSwitch(i,'bass', state, ctx)
-  state.blocks[`${i+2}/14`] = state.push(new Blinker(i, state, ctx))
+  // state.blocks[`${i+2}/14`] = state.push(new Blinker(i, state, ctx))
 }
 /* Play button */
 const playBtn = state.push(new PlayBtn(ctx, state, 0, 0))
@@ -69,8 +68,10 @@ for(let i = 0; i < instruments.length; i++){
   })
   btn.isToggled = () => instrumentWindow.instrument === instruments[i]
   state.push(btn)
-  state.blocks[`${Math.ceil(startX/40)}/2`] = btn
-  startX = startX + btn.width + 10
+  for(let k = 0; k <= Math.floor(btn.width/40); k++){
+    state.blocks[`${Math.ceil(startX/40) + k}/2`] = btn
+  }
+  startX = startX + btn.width
 }
 
 // /* 4 Beat markers */
