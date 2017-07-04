@@ -93,7 +93,7 @@ export default class State {
     while (this.noteTime < currentTime + 0.200) {
       var contextPlayTime = this.noteTime + this.startTime
       this.blinkers[this.rhythmIndex].toggle()
-      if(this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle()
+      if(this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle(false)
       /* for each instrument pass the step object for this page and beat into the play method */
       Object.keys(this.steps).forEach(type => {
         this.instruments[type].play(this.steps[type][this.page][this.rhythmIndex])

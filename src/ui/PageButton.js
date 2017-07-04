@@ -15,6 +15,7 @@ export default class PageButton {
     this.render()
   }
   render(){
+    this.value = this.state.page // reset page btn to top level page value
     this.context.clearRect(this.x, this.y, 40, 160)
     this.context.fillStyle = 'black'
     for(let i = 0; i < 4; i++){

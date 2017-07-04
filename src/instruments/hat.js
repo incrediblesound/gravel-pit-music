@@ -1,5 +1,5 @@
 import Listener from './Listener'
-import Control from '../ui/InstrumentControl'
+import ControlValue from '../ui/InstrumentControlValue'
 
 export default class Hat extends Listener {
   constructor(ctx){
@@ -51,6 +51,13 @@ function noiseBuffer(context) {
   return buffer;
 };
 
-export const hatControlFunction = (moduleMap) => {
-
+export const hatControlFunction = (state, modules, moduleMap, ctx, x, y) => {
+  const initialVolume = state.instruments.hat.volume
+  const volume = new ControlValue(ctx, x, y, 'Volume', initialVolume, 10, (value) => {
+      state.instruments.hat.setProp({ property: 'volume', value })
+  })
+  modules.push(volume)
+  moduleMap['0/0'] = volume
+  moduleMap['1/0'] = volume
+  moduleMap['2/0'] = volume
 }

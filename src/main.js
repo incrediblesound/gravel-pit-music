@@ -49,7 +49,9 @@ state.blocks['11/0'] = tempo
 state.blocks['12/0'] = tempo
 
 const toggleSwing = () => state.trigger({ type: 'toggle_swing' })
-state.blocks['14/0'] = state.push(new Options(['straight', 'swing'], toggleSwing, ctx, 14*40, 0))
+const swingToggle = state.push(new Options(['straight', 'swing'], toggleSwing, ctx, 14*40, 0))
+state.blocks['14/0'] = swingToggle
+state.blocks['15/0'] = swingToggle
 
 const instrumentWindow = state.push(new InstrumentWindow(state, ctx, 4*40, 3*40))
 for(let i = 4; i < 20; i++){
@@ -144,10 +146,15 @@ canvas.onclick = function (e) {
   }
 }
 
+const pageKeys = ['Digit1', 'Digit2', 'Digit3', 'Digit4']
+
 window.onkeydown = function(e){
   if(e.code && e.code === 'Space'){
     state.togglePlay()
     playBtn.render()
+  } else if(e.code && pageKeys.indexOf(e.code) !== -1){
+    const page = parseInt(e.code.split('Digit')[1]) - 1
+    state.trigger({ type: 'set_page', page })
   }
 }
 

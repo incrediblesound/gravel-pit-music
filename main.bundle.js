@@ -119,9 +119,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Control = function () {
-  function Control(ctx, x, y, text, initialValue, maxValue, cb) {
-    _classCallCheck(this, Control);
+var ControlValue = function () {
+  function ControlValue(ctx, x, y, text, initialValue, maxValue, cb) {
+    _classCallCheck(this, ControlValue);
 
     this.context = ctx;
     this.x = x;
@@ -132,7 +132,7 @@ var Control = function () {
     });
   }
 
-  _createClass(Control, [{
+  _createClass(ControlValue, [{
     key: 'handleClick',
     value: function handleClick(x, y, innerX, innerY) {
       this.valueInput.handleClick(x, y, innerX, innerY);
@@ -148,10 +148,10 @@ var Control = function () {
     }
   }]);
 
-  return Control;
+  return ControlValue;
 }();
 
-exports.default = Control;
+exports.default = ControlValue;
 
 /***/ }),
 /* 2 */
@@ -173,9 +173,9 @@ var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
 
-var _InstrumentControl = __webpack_require__(1);
+var _InstrumentControlValue = __webpack_require__(1);
 
-var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
+var _InstrumentControlValue2 = _interopRequireDefault(_InstrumentControlValue);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -295,13 +295,23 @@ var KeySynth = function (_Listener) {
 
 exports.default = KeySynth;
 var bassControlFunction = exports.bassControlFunction = function bassControlFunction(state, modules, moduleMap, ctx, x, y) {
-  var volume = new _InstrumentControl2.default(ctx, x, y, 'Volume', 8, 10, function (value) {
+  var initialVolume = state.instruments.bass.volume;
+  var volume = new _InstrumentControlValue2.default(ctx, x, y, 'Volume', initialVolume, 10, function (value) {
     state.instruments.bass.setProp({ property: 'volume', value: value });
   });
   modules.push(volume);
   moduleMap['0/0'] = volume;
   moduleMap['1/0'] = volume;
   moduleMap['2/0'] = volume;
+
+  var initialFilter = state.instruments.bass.filterValue;
+  var filter = new _InstrumentControlValue2.default(ctx, x + 3 * 40, y, 'Filter', initialFilter, 10, function (value) {
+    state.instruments.bass.setProp({ property: 'filterValue', value: value });
+  });
+  modules.push(filter);
+  moduleMap['3/0'] = filter;
+  moduleMap['4/0'] = filter;
+  moduleMap['5/0'] = filter;
 };
 
 /***/ }),
@@ -337,9 +347,9 @@ var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
 
-var _InstrumentControl = __webpack_require__(1);
+var _InstrumentControlValue = __webpack_require__(1);
 
-var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
+var _InstrumentControlValue2 = _interopRequireDefault(_InstrumentControlValue);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -363,6 +373,7 @@ var fmSynth = function (_Listener) {
     _this.prevOsc = null;
     _this.oscillators = {};
     _this.playing = false;
+    _this.waveformOptions = ['square', 'sine', 'sawtooth'];
     _this.waveform = 'square';
     return _this;
   }
@@ -520,7 +531,16 @@ var fmSynth = function (_Listener) {
 }(_Listener3.default);
 
 exports.default = fmSynth;
-var fmControlFunction = exports.fmControlFunction = function fmControlFunction(moduleMap) {};
+var fmControlFunction = exports.fmControlFunction = function fmControlFunction(state, modules, moduleMap, ctx, x, y) {
+  var initialVolume = state.instruments.fm.volume;
+  var volume = new _InstrumentControlValue2.default(ctx, x, y, 'Volume', initialVolume, 10, function (value) {
+    state.instruments.fm.setProp({ property: 'volume', value: value });
+  });
+  modules.push(volume);
+  moduleMap['0/0'] = volume;
+  moduleMap['1/0'] = volume;
+  moduleMap['2/0'] = volume;
+};
 
 /***/ }),
 /* 5 */
@@ -542,9 +562,9 @@ var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
 
-var _InstrumentControl = __webpack_require__(1);
+var _InstrumentControlValue = __webpack_require__(1);
 
-var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
+var _InstrumentControlValue2 = _interopRequireDefault(_InstrumentControlValue);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -630,7 +650,16 @@ function noiseBuffer(context) {
   return buffer;
 };
 
-var hatControlFunction = exports.hatControlFunction = function hatControlFunction(moduleMap) {};
+var hatControlFunction = exports.hatControlFunction = function hatControlFunction(state, modules, moduleMap, ctx, x, y) {
+  var initialVolume = state.instruments.hat.volume;
+  var volume = new _InstrumentControlValue2.default(ctx, x, y, 'Volume', initialVolume, 10, function (value) {
+    state.instruments.hat.setProp({ property: 'volume', value: value });
+  });
+  modules.push(volume);
+  moduleMap['0/0'] = volume;
+  moduleMap['1/0'] = volume;
+  moduleMap['2/0'] = volume;
+};
 
 /***/ }),
 /* 6 */
@@ -652,9 +681,9 @@ var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
 
-var _InstrumentControl = __webpack_require__(1);
+var _InstrumentControlValue = __webpack_require__(1);
 
-var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
+var _InstrumentControlValue2 = _interopRequireDefault(_InstrumentControlValue);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -675,6 +704,7 @@ var KickSynth = function (_Listener) {
     _this.volume = 8;
     _this.context = ctx;
     _this.decay = 0;
+    _this.attack = 9;
     _this.config = {
       type: 'sine'
     };
@@ -692,7 +722,7 @@ var KickSynth = function (_Listener) {
       var gain = this.context.createGain();
       var blipGain = this.context.createGain();
       gain.gain.value = this.volume * 0.1;
-      blipGain.gain.value = this.volume * 0.1;
+      blipGain.gain.value = (this.volume - (9 - this.attack)) * 0.1;
       osc.frequency.value = 55;
       blipOsc.frequency.value = 440;
       osc.detune.value = note * 100;
@@ -719,6 +749,7 @@ var KickSynth = function (_Listener) {
       if (step) {
         osc.start();
         blipOsc.start();
+        blipGain.gain.setTargetAtTime(this.volume * 0.1, this.context.currentTime, 0.01 * this.attack);
         gain.gain.setTargetAtTime(0, this.context.currentTime, 0.07 + this.decay * 0.01);
         blipGain.gain.setTargetAtTime(0, this.context.currentTime, 0.10);
         blipOsc.frequency.setTargetAtTime(55, this.context.currentTime, 0.05);
@@ -732,7 +763,25 @@ var KickSynth = function (_Listener) {
 }(_Listener3.default);
 
 exports.default = KickSynth;
-var kickControlFunction = exports.kickControlFunction = function kickControlFunction(moduleMap) {};
+var kickControlFunction = exports.kickControlFunction = function kickControlFunction(state, modules, moduleMap, ctx, x, y) {
+  var initialVolume = state.instruments.kick.volume;
+  var volume = new _InstrumentControlValue2.default(ctx, x, y, 'Volume', initialVolume, 10, function (value) {
+    state.instruments.kick.setProp({ property: 'volume', value: value });
+  });
+  modules.push(volume);
+  moduleMap['0/0'] = volume;
+  moduleMap['1/0'] = volume;
+  moduleMap['2/0'] = volume;
+
+  var initialAttack = state.instruments.kick.attack;
+  var attack = new _InstrumentControlValue2.default(ctx, x, y + 40, 'Attack', initialAttack, 10, function (value) {
+    state.instruments.kick.setProp({ property: 'attack', value: value });
+  });
+  modules.push(attack);
+  moduleMap['0/1'] = attack;
+  moduleMap['1/1'] = attack;
+  moduleMap['2/1'] = attack;
+};
 
 /***/ }),
 /* 7 */
@@ -754,9 +803,9 @@ var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
 
-var _InstrumentControl = __webpack_require__(1);
+var _InstrumentControlValue = __webpack_require__(1);
 
-var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
+var _InstrumentControlValue2 = _interopRequireDefault(_InstrumentControlValue);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -855,7 +904,16 @@ var LeadSynth = function (_Listener) {
 }(_Listener3.default);
 
 exports.default = LeadSynth;
-var leadControlFunction = exports.leadControlFunction = function leadControlFunction(moduleMap) {};
+var leadControlFunction = exports.leadControlFunction = function leadControlFunction(state, modules, moduleMap, ctx, x, y) {
+  var initialVolume = state.instruments.lead.volume;
+  var volume = new _InstrumentControlValue2.default(ctx, x, y, 'Volume', initialVolume, 10, function (value) {
+    state.instruments.lead.setProp({ property: 'volume', value: value });
+  });
+  modules.push(volume);
+  moduleMap['0/0'] = volume;
+  moduleMap['1/0'] = volume;
+  moduleMap['2/0'] = volume;
+};
 
 /***/ }),
 /* 8 */
@@ -877,9 +935,9 @@ var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
 
-var _InstrumentControl = __webpack_require__(1);
+var _InstrumentControlValue = __webpack_require__(1);
 
-var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
+var _InstrumentControlValue2 = _interopRequireDefault(_InstrumentControlValue);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -987,7 +1045,16 @@ function noiseBuffer(context) {
   return buffer;
 };
 
-var snareControlFunction = exports.snareControlFunction = function snareControlFunction(moduleMap) {};
+var snareControlFunction = exports.snareControlFunction = function snareControlFunction(state, modules, moduleMap, ctx, x, y) {
+  var initialVolume = state.instruments.snare.volume;
+  var volume = new _InstrumentControlValue2.default(ctx, x, y, 'Volume', initialVolume, 10, function (value) {
+    state.instruments.snare.setProp({ property: 'volume', value: value });
+  });
+  modules.push(volume);
+  moduleMap['0/0'] = volume;
+  moduleMap['1/0'] = volume;
+  moduleMap['2/0'] = volume;
+};
 
 /***/ }),
 /* 9 */
@@ -1150,7 +1217,7 @@ var State = function () {
       while (this.noteTime < currentTime + 0.200) {
         var contextPlayTime = this.noteTime + this.startTime;
         this.blinkers[this.rhythmIndex].toggle();
-        if (this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle();
+        if (this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle(false);
         /* for each instrument pass the step object for this page and beat into the play method */
         Object.keys(this.steps).forEach(function (type) {
           _this3.instruments[type].play(_this3.steps[type][_this3.page][_this3.rhythmIndex]);
@@ -1474,8 +1541,12 @@ var Options = function () {
     key: 'render',
     value: function render() {
       this.context.fillStyle = 'black';
-      this.context.clearRect(this.x, this.y, 40, 40);
-      this.context.fillText(this.options[this.idx], this.x + 3, this.y + 25, 39);
+      this.context.fillRect(this.x, this.y, 80, 40);
+      this.context.clearRect(this.x + 1, this.y + 1, 78, 38);
+      var text = this.options[this.idx];
+      var textWidth = Math.ceil(this.context.measureText(text).width);
+      var offset = 40 - textWidth / 2;
+      this.context.fillText(text, this.x + offset, this.y + 25, 39);
     }
   }, {
     key: 'handleClick',
@@ -1530,6 +1601,7 @@ var PageButton = function () {
   }, {
     key: 'render',
     value: function render() {
+      this.value = this.state.page; // reset page btn to top level page value
       this.context.clearRect(this.x, this.y, 40, 160);
       this.context.fillStyle = 'black';
       for (var i = 0; i < 4; i++) {
@@ -1816,7 +1888,9 @@ state.blocks['12/0'] = tempo;
 var toggleSwing = function toggleSwing() {
   return state.trigger({ type: 'toggle_swing' });
 };
-state.blocks['14/0'] = state.push(new _Options2.default(['straight', 'swing'], toggleSwing, ctx, 14 * 40, 0));
+var swingToggle = state.push(new _Options2.default(['straight', 'swing'], toggleSwing, ctx, 14 * 40, 0));
+state.blocks['14/0'] = swingToggle;
+state.blocks['15/0'] = swingToggle;
 
 var instrumentWindow = state.push(new _InstrumentWindow2.default(state, ctx, 4 * 40, 3 * 40));
 for (var _i = 4; _i < 20; _i++) {
@@ -1917,10 +1991,15 @@ canvas.onclick = function (e) {
   }
 };
 
+var pageKeys = ['Digit1', 'Digit2', 'Digit3', 'Digit4'];
+
 window.onkeydown = function (e) {
   if (e.code && e.code === 'Space') {
     state.togglePlay();
     playBtn.render();
+  } else if (e.code && pageKeys.indexOf(e.code) !== -1) {
+    var page = parseInt(e.code.split('Digit')[1]) - 1;
+    state.trigger({ type: 'set_page', page: page });
   }
 };
 
@@ -1948,6 +2027,7 @@ var Blinker = function () {
     this.context = ctx;
     state.blinkers[i] = this;
     this.idx = i;
+    this.on = false;
     this.x = x;
     this.y = y;
   }
@@ -1977,8 +2057,8 @@ var Blinker = function () {
     value: function handleClick() {}
   }, {
     key: 'toggle',
-    value: function toggle() {
-      this.on = !this.on;
+    value: function toggle(value) {
+      this.on = value !== undefined ? value : !this.on;
       this.render();
     }
   }]);

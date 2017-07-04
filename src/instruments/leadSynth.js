@@ -1,5 +1,5 @@
 import Listener from './Listener'
-import Control from '../ui/InstrumentControl'
+import ControlValue from '../ui/InstrumentControlValue'
 
 export default class LeadSynth extends Listener {
   constructor(ctx){
@@ -64,6 +64,13 @@ export default class LeadSynth extends Listener {
   }
 }
 
-export const leadControlFunction = (moduleMap) => {
-
+export const leadControlFunction = (state, modules, moduleMap, ctx, x, y) => {
+  const initialVolume = state.instruments.lead.volume
+  const volume = new ControlValue(ctx, x, y, 'Volume', initialVolume, 10, (value) => {
+      state.instruments.lead.setProp({ property: 'volume', value })
+  })
+  modules.push(volume)
+  moduleMap['0/0'] = volume
+  moduleMap['1/0'] = volume
+  moduleMap['2/0'] = volume
 }

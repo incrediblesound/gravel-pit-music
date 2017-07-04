@@ -1,6 +1,6 @@
 import ValueInput from './ValueInput'
 
-export default class Control {
+export default class ControlValue {
   constructor(ctx, x, y, text, initialValue, maxValue, cb){
     this.context = ctx
     this.x = x

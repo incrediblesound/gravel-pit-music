@@ -3,6 +3,7 @@ export default class Blinker {
     this.context = ctx
     state.blinkers[i] = this
     this.idx = i
+    this.on = false
     this.x = x
     this.y = y
   }
@@ -23,8 +24,8 @@ export default class Blinker {
     this.context.stroke();
   }
   handleClick(){}
-  toggle(){
-    this.on = !this.on
+  toggle(value){
+    this.on = value !== undefined ? value : !this.on
     this.render()
   }
 }
