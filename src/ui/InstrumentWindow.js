@@ -2,6 +2,7 @@ import BassSynth from '../instruments/synth'
 import { BinSwitch, OctaveSwitch } from './switch'
 import Blinker from './Blinker'
 import Note from './note'
+import instrumentControlFunctions from '../instruments/instrumentControlFunctions'
 
 export default class InstrumentWindow {
   constructor(state, ctx, x, y){
@@ -10,37 +11,43 @@ export default class InstrumentWindow {
     this.parent = state
     this.context = ctx
     this.instrument = 'bass'
+    this.instrumentControlMap = {}
     this.moduleMap = {}
+    this.children = []
+    this.instrumentControls = []
     this.build()
+  }
+  push(child){
+    this.children.push(child)
+    return child
   }
   build(){
     for(var i = 0; i < 16; i++){
-      this.moduleMap[`${i}/9`] = new Note(i, this, this.context)
-      this.moduleMap[`${i}/10`] = new OctaveSwitch(i, this, this.context)
-      this.moduleMap[`${i}/11`] = new Blinker(i, this.parent, this.context)
+      this.moduleMap[`${i}/9`] = this.push(new Note(i, this, this.context, this.x+i*40, this.y+9*40))
+      this.moduleMap[`${i}/10`] = this.push(new OctaveSwitch(i, this, this.context, this.x+i*40, this.y+10*40))
+      this.moduleMap[`${i}/11`] = this.push(new Blinker(i, this.parent, this.context, this.x+i*40, this.y+11*40))
     }
+    this.buildInstrumentControls()
+  }
+  buildInstrumentControls(){
+    instrumentControlFunctions[this.instrument](this.parent, this.instrumentControls, this.instrumentControlMap, this.context, this.x, this.y)
   }
   trigger(message){
     return this.parent.trigger(message)
   }
   setInstrument(instrument){
     this.instrument = instrument
+    this.instrumentControls = []
+    this.instrumentControlMap = {}
+    this.build()
     this.parent.drawScreen()
   }
   getPage(){
     return this.trigger({ type: 'get_page', instrument: this.instrument })
   }
   renderChildren(){
-    Object.keys(this.moduleMap).forEach(key => {
-      let [ x, y ] = key.split('/')
-      x = parseInt(x) * 40
-      y = parseInt(y) * 40
-      x += this.x
-      y += this.y
-      const module = this.moduleMap[key]
-      if(module.setPos) module.setPos(x, y)
-      module.render()
-    })
+    this.children.forEach(child => child.render())
+    this.instrumentControls.forEach(child => child.render())
   }
   render(){
     this.context.fillRect(this.x, this.y, 640, 480)
@@ -50,7 +57,8 @@ export default class InstrumentWindow {
   handleClick(x, y, innerX, innerY){
     let xCell = x - (this.x/40)
     let yCell = y - (this.y/40)
-    let module = this.moduleMap[`${xCell}/${yCell}`]
+    let key = `${xCell}/${yCell}`
+    let module = this.moduleMap[key] || this.instrumentControlMap[key]
     if(module) module.handleClick(x, y, innerX, innerY)
   }
 }

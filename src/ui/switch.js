@@ -31,12 +31,12 @@ export class BinSwitch {
 }
 
 export class OctaveSwitch {
-  constructor(idx, state, ctx){
+  constructor(idx, state, ctx, x, y){
     this.idx = idx
     this.state = state
     this.context = ctx
-    this.x = null
-    this.y = null
+    this.x = x
+    this.y = y
     this.colors = ['black', 'red', 'blue']
   }
   render(){
@@ -46,10 +46,6 @@ export class OctaveSwitch {
     this.context.fillStyle = page[this.idx].hold ? 'green' : 'yellow'
     this.context.fillRect(this.x, this.y, 10, 10)
     this.context.fillStyle = COLOR
-  }
-  setPos(x, y){
-    this.x = x
-    this.y = y
   }
   handleClick(x, y, innerX, innerY){
     const isHold = innerX <= 10 && innerY <= 10

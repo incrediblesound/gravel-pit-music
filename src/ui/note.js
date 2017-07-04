@@ -1,11 +1,9 @@
 export default class Note {
-  constructor(idx, parent, context){
+  constructor(idx, parent, context, x, y){
     this.notes = ['c','c#','d','d#','e','f','f#','g','g#','a','a#','b'],
     this.parent = parent
     this.context = context
     this.idx = idx
-  }
-  setPos(x, y){
     this.x = x
     this.y = y
   }

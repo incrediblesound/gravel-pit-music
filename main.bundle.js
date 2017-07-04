@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 18);
+/******/ 	return __webpack_require__(__webpack_require__.s = 19);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -108,8 +108,50 @@ exports.default = Listener;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var COLOR = exports.COLOR = 'white';
-var LOOP_LENGTH = exports.LOOP_LENGTH = 16;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _ValueInput = __webpack_require__(21);
+
+var _ValueInput2 = _interopRequireDefault(_ValueInput);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Control = function () {
+  function Control(ctx, x, y, text, initialValue, maxValue, cb) {
+    _classCallCheck(this, Control);
+
+    this.context = ctx;
+    this.x = x;
+    this.y = y;
+    this.text = text;
+    this.valueInput = new _ValueInput2.default({
+      ctx: ctx, x: x + 80, y: y, initialValue: initialValue, maxValue: maxValue, cb: cb
+    });
+  }
+
+  _createClass(Control, [{
+    key: 'handleClick',
+    value: function handleClick(x, y, innerX, innerY) {
+      this.valueInput.handleClick(x, y, innerX, innerY);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      this.context.fillStyle = 'black';
+      this.context.fillRect(this.x, this.y, 120, 40);
+      this.context.clearRect(this.x + 1, this.y + 1, 118, 38);
+      this.context.fillText(this.text, this.x + 5, this.y + 25, 80);
+      this.valueInput.render();
+    }
+  }]);
+
+  return Control;
+}();
+
+exports.default = Control;
 
 /***/ }),
 /* 2 */
@@ -121,6 +163,7 @@ var LOOP_LENGTH = exports.LOOP_LENGTH = 16;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.bassControlFunction = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -129,6 +172,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
+
+var _InstrumentControl = __webpack_require__(1);
+
+var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -150,7 +197,7 @@ var KeySynth = function (_Listener) {
     _this.volume = 8;
     _this.context = ctx;
     _this.oscillators = {};
-    _this.filterValue = 0;
+    _this.filterValue = 1;
     _this.playing = false;
     return _this;
   }
@@ -247,6 +294,15 @@ var KeySynth = function (_Listener) {
 }(_Listener3.default);
 
 exports.default = KeySynth;
+var bassControlFunction = exports.bassControlFunction = function bassControlFunction(state, modules, moduleMap, ctx, x, y) {
+  var volume = new _InstrumentControl2.default(ctx, x, y, 'Volume', 8, 10, function (value) {
+    state.instruments.bass.setProp({ property: 'volume', value: value });
+  });
+  modules.push(volume);
+  moduleMap['0/0'] = volume;
+  moduleMap['1/0'] = volume;
+  moduleMap['2/0'] = volume;
+};
 
 /***/ }),
 /* 3 */
@@ -258,208 +314,8 @@ exports.default = KeySynth;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _kick = __webpack_require__(15);
-
-var _kick2 = _interopRequireDefault(_kick);
-
-var _leadSynth = __webpack_require__(16);
-
-var _leadSynth2 = _interopRequireDefault(_leadSynth);
-
-var _synth = __webpack_require__(2);
-
-var _synth2 = _interopRequireDefault(_synth);
-
-var _fm = __webpack_require__(13);
-
-var _fm2 = _interopRequireDefault(_fm);
-
-var _snare = __webpack_require__(17);
-
-var _snare2 = _interopRequireDefault(_snare);
-
-var _hat = __webpack_require__(14);
-
-var _hat2 = _interopRequireDefault(_hat);
-
-var _constants = __webpack_require__(1);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function makeStepArray(steps) {
-  var empty = [];
-  empty.length = steps;
-  empty.fill(undefined);
-  var arr = empty.map(function (item) {
-    return { step: 0, note: 0, hold: false };
-  });
-  return arr;
-}
-
-var State = function () {
-  function State(audioCtx) {
-    _classCallCheck(this, State);
-
-    this.swingIsOn = false;
-    this.isPlaying = false;
-    this.tempo = 120;
-    this.page = 0;
-    this.blocks = {};
-    this.blinkers = [];
-    this.children = [];
-    this.steps = {
-      bass: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
-      kick: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
-      snare: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
-      lead: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
-      fm: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
-      hat: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)]
-    };
-    this.copyBuffer = { notes: {}, steps: {} };
-    this.step = 0;
-    this.context = audioCtx;
-    this.instruments = {
-      bass: new _synth2.default(audioCtx),
-      kick: new _kick2.default(audioCtx),
-      snare: new _snare2.default(audioCtx),
-      fm: new _fm2.default(audioCtx),
-      lead: new _leadSynth2.default(audioCtx),
-      hat: new _hat2.default(audioCtx)
-    };
-  }
-
-  _createClass(State, [{
-    key: 'push',
-    value: function push(child) {
-      this.children.push(child);
-      return child;
-    }
-  }, {
-    key: 'trigger',
-    value: function trigger(message) {
-      switch (message.type) {
-        case 'get_page':
-          return this.steps[message.instrument][this.page];
-        case 'toggle_swing':
-          return this.swingIsOn = !this.swingIsOn;
-        case 'set_page':
-          this.page = message.page;
-          this.drawScreen();
-          return message.page;
-        case 'copy_page':
-          return this.copyPage();
-        case 'paste_page':
-          return this.pastePage();
-      }
-    }
-  }, {
-    key: 'toggleStep',
-    value: function toggleStep(idx, type, values) {
-      this.steps[type][this.page][idx].step = (this.steps[type][this.page][idx].step + 1) % values;
-    }
-  }, {
-    key: 'togglePlay',
-    value: function togglePlay() {
-      this.isPlaying = !this.isPlaying;
-
-      if (this.isPlaying) {
-        this.noteTime = 0.0;
-        this.startTime = this.context.currentTime + 0.005;
-        this.rhythmIndex = 0;
-        this.previousRhythmIndex = null;
-        this.schedule();
-      } else {
-        this.stop();
-      }
-    }
-  }, {
-    key: 'copyPage',
-    value: function copyPage() {
-      var _this = this;
-
-      Object.keys(this.steps).forEach(function (stepKey) {
-        _this.copyBuffer.steps[stepKey] = _this.steps[stepKey][_this.page].slice().map(function (step) {
-          return Object.assign({}, step);
-        });
-      });
-    }
-  }, {
-    key: 'pastePage',
-    value: function pastePage() {
-      var _this2 = this;
-
-      Object.keys(this.steps).forEach(function (stepKey) {
-        _this2.steps[stepKey][_this2.page] = _this2.copyBuffer.steps[stepKey].slice();
-      });
-      this.refreshScreen();
-    }
-  }, {
-    key: 'schedule',
-    value: function schedule() {
-      var _this3 = this;
-
-      var currentTime = this.context.currentTime;
-      currentTime -= this.startTime;
-
-      while (this.noteTime < currentTime + 0.200) {
-        var contextPlayTime = this.noteTime + this.startTime;
-        this.blinkers[this.rhythmIndex].toggle();
-        if (this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle();
-        /* for each instrument pass the step object for this page and beat into the play method */
-        Object.keys(this.steps).forEach(function (type) {
-          _this3.instruments[type].play(_this3.steps[type][_this3.page][_this3.rhythmIndex]);
-        });
-        this.advanceNote();
-      }
-      this.interval = setTimeout(function () {
-        _this3.schedule();
-      }, 0);
-    }
-  }, {
-    key: 'advanceNote',
-    value: function advanceNote() {
-      var secondsPerBeat = 60 / this.tempo;
-      this.previousRhythmIndex = this.rhythmIndex;
-      this.rhythmIndex++;
-      if (this.rhythmIndex === _constants.LOOP_LENGTH) {
-        this.rhythmIndex = 0;
-      }
-
-      if (this.swingIsOn) {
-        this.noteTime += this.rhythmIndex % 2 ? 0.32 * secondsPerBeat : 0.18 * secondsPerBeat;
-      } else {
-        this.noteTime += 0.25 * secondsPerBeat;
-      }
-    }
-  }, {
-    key: 'stop',
-    value: function stop() {
-      var _this4 = this;
-
-      Object.keys(this.instruments).forEach(function (key) {
-        _this4.instruments[key].stopAll();
-      });
-      this.blinkers[this.previousRhythmIndex].toggle();
-      window.clearInterval(this.interval);
-    }
-  }, {
-    key: 'drawScreen',
-    value: function drawScreen() {
-      this.children.forEach(function (child) {
-        return child.render();
-      });
-    }
-  }]);
-
-  return State;
-}();
-
-exports.default = State;
+var COLOR = exports.COLOR = 'white';
+var LOOP_LENGTH = exports.LOOP_LENGTH = 16;
 
 /***/ }),
 /* 4 */
@@ -471,534 +327,7 @@ exports.default = State;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var BeatMarker = function () {
-  function BeatMarker(ctx, x, y) {
-    _classCallCheck(this, BeatMarker);
-
-    this.context = ctx;
-    this.x = x;
-    this.y = y;
-  }
-
-  _createClass(BeatMarker, [{
-    key: 'render',
-    value: function render() {
-      this.context.fillStyle = 'red';
-      this.context.fillRect(this.x, this.y, 40, 40);
-      this.context.clearRect(this.x, this.y, 30, 30);
-    }
-  }, {
-    key: 'handleClick',
-    value: function handleClick() {}
-  }]);
-
-  return BeatMarker;
-}();
-
-exports.default = BeatMarker;
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Button = function () {
-  function Button(text, ctx, x, y, handleClick) {
-    _classCallCheck(this, Button);
-
-    this.x = x;
-    this.y = y;
-    this.text = text;
-    this.textWidth = Math.ceil(ctx.measureText(text).width);
-    this.width = Math.ceil((this.textWidth + 10) / 40) * 40;
-    this.toggled = false;
-    this.context = ctx;
-    this.callBack = handleClick;
-  }
-
-  _createClass(Button, [{
-    key: 'handleClick',
-    value: function handleClick(x, y) {
-      this.toggled = !this.toggled;
-      this.callBack(this.toggled);
-      this.render();
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      this.context.clearRect(this.x, this.y, this.width, 40);
-      this.context.fillStyle = 'black';
-      this.context.fillRect(this.x, this.y, this.width, 40);
-      if (this.isToggled ? this.isToggled() : this.toggled) {
-        this.context.fillStyle = '#999';
-        this.context.fillRect(this.x + 1, this.y, this.width - 2, 39);
-      } else {
-        this.context.clearRect(this.x + 1, this.y + 1, this.width - 2, 39);
-      }
-      this.context.fillStyle = 'black';
-      this.context.fillText(this.text, this.x + 5, this.y + 25, this.width + 3);
-    }
-  }]);
-
-  return Button;
-}();
-
-exports.default = Button;
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _synth = __webpack_require__(2);
-
-var _synth2 = _interopRequireDefault(_synth);
-
-var _switch = __webpack_require__(21);
-
-var _Blinker = __webpack_require__(19);
-
-var _Blinker2 = _interopRequireDefault(_Blinker);
-
-var _note = __webpack_require__(20);
-
-var _note2 = _interopRequireDefault(_note);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var InstrumentWindow = function () {
-  function InstrumentWindow(state, ctx, x, y) {
-    _classCallCheck(this, InstrumentWindow);
-
-    this.x = x;
-    this.y = y;
-    this.parent = state;
-    this.context = ctx;
-    this.instrument = 'bass';
-    this.moduleMap = {};
-    this.build();
-  }
-
-  _createClass(InstrumentWindow, [{
-    key: 'build',
-    value: function build() {
-      for (var i = 0; i < 16; i++) {
-        this.moduleMap[i + '/9'] = new _note2.default(i, this, this.context);
-        this.moduleMap[i + '/10'] = new _switch.OctaveSwitch(i, this, this.context);
-        this.moduleMap[i + '/11'] = new _Blinker2.default(i, this.parent, this.context);
-      }
-    }
-  }, {
-    key: 'trigger',
-    value: function trigger(message) {
-      return this.parent.trigger(message);
-    }
-  }, {
-    key: 'setInstrument',
-    value: function setInstrument(instrument) {
-      this.instrument = instrument;
-      this.parent.drawScreen();
-    }
-  }, {
-    key: 'getPage',
-    value: function getPage() {
-      return this.trigger({ type: 'get_page', instrument: this.instrument });
-    }
-  }, {
-    key: 'renderChildren',
-    value: function renderChildren() {
-      var _this = this;
-
-      Object.keys(this.moduleMap).forEach(function (key) {
-        var _key$split = key.split('/'),
-            _key$split2 = _slicedToArray(_key$split, 2),
-            x = _key$split2[0],
-            y = _key$split2[1];
-
-        x = parseInt(x) * 40;
-        y = parseInt(y) * 40;
-        x += _this.x;
-        y += _this.y;
-        var module = _this.moduleMap[key];
-        if (module.setPos) module.setPos(x, y);
-        module.render();
-      });
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      this.context.fillRect(this.x, this.y, 640, 480);
-      this.context.clearRect(this.x + 1, this.y + 1, 638, 478);
-      this.renderChildren();
-    }
-  }, {
-    key: 'handleClick',
-    value: function handleClick(x, y, innerX, innerY) {
-      var xCell = x - this.x / 40;
-      var yCell = y - this.y / 40;
-      var module = this.moduleMap[xCell + '/' + yCell];
-      if (module) module.handleClick(x, y, innerX, innerY);
-    }
-  }]);
-
-  return InstrumentWindow;
-}();
-
-/*
-    0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
-0   . . . . . . . . . . .  .  .  .  .  .  .
-1   . . . . . . . . . . .  .  .  .  .  .  .
-2   . . . . . . . . . . .  .  .  .  .  .  .
-3   . . . . . . . . . . .  .  .  .  .  .  .
-4   . . . . . . . . . . .  .  .  .  .  .  .
-5   . . . . . . . . . . .  .  .  .  .  .  .
-6   . . . . . . . . . . .  .  .  .  .  .  .
-7   . . . . . . . . . . .  .  .  .  .  .  .
-8   . . . . . . . . . . .  .  .  .  .  .  .
-9   . . . . . . . . . . .  .  .  .  .  .  .
-10  . . . . . . . . . . .  .  .  .  .  .  .
-11  . . . . . . . . . . .  .  .  .  .  .  .
-*/
-
-
-exports.default = InstrumentWindow;
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Options = function () {
-  function Options(options, callBack, ctx, x, y) {
-    _classCallCheck(this, Options);
-
-    this.context = ctx;
-    this.idx = 0;
-    this.options = options;
-    this.callBack = callBack;
-    this.x = x;
-    this.y = y;
-  }
-
-  _createClass(Options, [{
-    key: 'render',
-    value: function render() {
-      this.context.fillStyle = 'black';
-      this.context.clearRect(this.x, this.y, 40, 40);
-      this.context.fillText(this.options[this.idx], this.x + 3, this.y + 25, 39);
-    }
-  }, {
-    key: 'handleClick',
-    value: function handleClick() {
-      this.idx = (this.idx + 1) % this.options.length;
-      this.render();
-      this.callBack(this.options[this.idx]);
-    }
-  }]);
-
-  return Options;
-}();
-
-exports.default = Options;
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var PageButton = function () {
-  function PageButton(state, ctx, x, y, handleClick) {
-    _classCallCheck(this, PageButton);
-
-    this.context = ctx;
-    this.state = state;
-    this.pageOne = x / 40;
-    this.x = x;
-    this.y = y;
-    this.value = 0;
-    this.callBack = handleClick;
-  }
-
-  _createClass(PageButton, [{
-    key: 'handleClick',
-    value: function handleClick(x, y) {
-      var buttonIdx = x - this.pageOne;
-      this.value = buttonIdx;
-      this.state.trigger({ type: 'set_page', page: this.value });
-      this.render();
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      this.context.clearRect(this.x, this.y, 40, 160);
-      this.context.fillStyle = 'black';
-      for (var i = 0; i < 4; i++) {
-        var offset = 40 * i;
-        var name = 'Pg ' + (i + 1);
-        this.context.fillRect(this.x + offset, this.y, 40, 40);
-        if (i === this.value) {
-          this.context.fillStyle = '#999';
-          this.context.fillRect(this.x + offset + 1, this.y, 39 - (i === 3 ? 1 : 0), 39);
-        } else {
-          this.context.clearRect(this.x + offset + 1, this.y, 39 - (i === 3 ? 1 : 0), 39);
-        }
-        this.context.fillStyle = 'black';
-        this.context.fillText(name, this.x + offset + 3, this.y + 25, 80);
-      }
-    }
-  }]);
-
-  return PageButton;
-}();
-
-exports.default = PageButton;
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var PlayBtn = function () {
-  function PlayBtn(ctx, state, x, y) {
-    _classCallCheck(this, PlayBtn);
-
-    this.context = ctx;
-    this.state = state;
-    this.x = x;
-    this.y = y;
-    this.on = state.isPlaying;
-  }
-
-  _createClass(PlayBtn, [{
-    key: 'render',
-    value: function render() {
-      this.on = this.state.isPlaying;
-      this.context.fillStyle = this.on ? 'red' : 'green';
-      this.context.fillRect(this.x, this.y, 40, 40);
-      this.context.fillStyle = this.on ? 'black' : 'white';
-      this.context.fillText(this.on ? 'STOP' : 'PLAY', this.x + 1, this.y + 25, 80);
-    }
-  }, {
-    key: 'handleClick',
-    value: function handleClick() {
-      this.state.togglePlay();
-      this.on = this.state.isPlaying;
-      this.render();
-    }
-  }]);
-
-  return PlayBtn;
-}();
-
-exports.default = PlayBtn;
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var PlayBtn = function () {
-  function PlayBtn(state, ctx, x, y) {
-    _classCallCheck(this, PlayBtn);
-
-    this.context = ctx;
-    this.state = state;
-    this.x = x;
-    this.y = y;
-  }
-
-  _createClass(PlayBtn, [{
-    key: 'render',
-    value: function render() {
-      var tempoText = this.state.tempo + '/bpms';
-      this.context.fillStyle = 'black';
-      this.context.clearRect(this.x, this.y, 65, 40);
-      this.context.fillText('+', this.x + 25, this.y + 10, 80);
-      this.context.fillText('-', this.x + 26, this.y + 40, 80);
-      this.context.fillText(tempoText, this.x, this.y + 25, 80);
-    }
-  }, {
-    key: 'handleClick',
-    value: function handleClick(x, y, innerX, innerY) {
-      var section = Math.floor(innerY / 20);
-      this.state.tempo = section ? this.state.tempo - 1 : this.state.tempo + 1;
-      this.render();
-    }
-  }]);
-
-  return PlayBtn;
-}();
-
-exports.default = PlayBtn;
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Volume = function () {
-  function Volume(state, ctx, x, y, cb) {
-    _classCallCheck(this, Volume);
-
-    this.context = ctx;
-    this.state = state;
-    this.value = 8;
-    this.x = x;
-    this.y = y;
-    this.callback = cb;
-  }
-
-  _createClass(Volume, [{
-    key: 'render',
-    value: function render() {
-      this.context.fillStyle = 'black';
-      this.context.clearRect(this.x, this.y, 40, 40);
-      this.context.fillText('+', this.x + 20, this.y + 13, 40);
-      this.context.fillText('-', this.x + 21, this.y + 37, 40);
-      this.context.fillText(this.value, this.x, this.y + 25, 40);
-    }
-  }, {
-    key: 'handleClick',
-    value: function handleClick(x, y, innerX, innerY) {
-      var section = Math.floor(innerY / 20);
-      this.value = Math.abs((section ? this.value - 1 : this.value + 1) % 10);
-      this.callback(this.value);
-      this.render();
-    }
-  }]);
-
-  return Volume;
-}();
-
-exports.default = Volume;
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Word = function () {
-  function Word(word, ctx, x, y, handleClick) {
-    _classCallCheck(this, Word);
-
-    this.context = ctx;
-    this.word = word;
-    this.x = x;
-    this.y = y;
-    this.handleClick = handleClick || function () {};
-  }
-
-  _createClass(Word, [{
-    key: 'render',
-    value: function render() {
-      this.context.clearRect(this.x, this.y, 40, 40);
-      this.context.fillStyle = 'green';
-      this.context.fillText(this.word, this.x + 3, this.y + 25, 80);
-    }
-  }]);
-
-  return Word;
-}();
-
-exports.default = Word;
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
+exports.fmControlFunction = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -1007,6 +336,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
+
+var _InstrumentControl = __webpack_require__(1);
+
+var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1187,9 +520,10 @@ var fmSynth = function (_Listener) {
 }(_Listener3.default);
 
 exports.default = fmSynth;
+var fmControlFunction = exports.fmControlFunction = function fmControlFunction(moduleMap) {};
 
 /***/ }),
-/* 14 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1198,6 +532,7 @@ exports.default = fmSynth;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.hatControlFunction = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -1206,6 +541,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
+
+var _InstrumentControl = __webpack_require__(1);
+
+var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1291,8 +630,10 @@ function noiseBuffer(context) {
   return buffer;
 };
 
+var hatControlFunction = exports.hatControlFunction = function hatControlFunction(moduleMap) {};
+
 /***/ }),
-/* 15 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1301,6 +642,7 @@ function noiseBuffer(context) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.kickControlFunction = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -1309,6 +651,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
+
+var _InstrumentControl = __webpack_require__(1);
+
+var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1386,9 +732,10 @@ var KickSynth = function (_Listener) {
 }(_Listener3.default);
 
 exports.default = KickSynth;
+var kickControlFunction = exports.kickControlFunction = function kickControlFunction(moduleMap) {};
 
 /***/ }),
-/* 16 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1397,6 +744,7 @@ exports.default = KickSynth;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.leadControlFunction = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -1405,6 +753,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
+
+var _InstrumentControl = __webpack_require__(1);
+
+var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1503,9 +855,10 @@ var LeadSynth = function (_Listener) {
 }(_Listener3.default);
 
 exports.default = LeadSynth;
+var leadControlFunction = exports.leadControlFunction = function leadControlFunction(moduleMap) {};
 
 /***/ }),
-/* 17 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1514,6 +867,7 @@ exports.default = LeadSynth;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.snareControlFunction = undefined;
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
@@ -1522,6 +876,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _Listener2 = __webpack_require__(0);
 
 var _Listener3 = _interopRequireDefault(_Listener2);
+
+var _InstrumentControl = __webpack_require__(1);
+
+var _InstrumentControl2 = _interopRequireDefault(_InstrumentControl);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1629,6 +987,710 @@ function noiseBuffer(context) {
   return buffer;
 };
 
+var snareControlFunction = exports.snareControlFunction = function snareControlFunction(moduleMap) {};
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _kick = __webpack_require__(6);
+
+var _kick2 = _interopRequireDefault(_kick);
+
+var _leadSynth = __webpack_require__(7);
+
+var _leadSynth2 = _interopRequireDefault(_leadSynth);
+
+var _synth = __webpack_require__(2);
+
+var _synth2 = _interopRequireDefault(_synth);
+
+var _fm = __webpack_require__(4);
+
+var _fm2 = _interopRequireDefault(_fm);
+
+var _snare = __webpack_require__(8);
+
+var _snare2 = _interopRequireDefault(_snare);
+
+var _hat = __webpack_require__(5);
+
+var _hat2 = _interopRequireDefault(_hat);
+
+var _constants = __webpack_require__(3);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function makeStepArray(steps) {
+  var empty = [];
+  empty.length = steps;
+  empty.fill(undefined);
+  var arr = empty.map(function (item) {
+    return { step: 0, note: 0, hold: false };
+  });
+  return arr;
+}
+
+var State = function () {
+  function State(audioCtx) {
+    _classCallCheck(this, State);
+
+    this.swingIsOn = false;
+    this.isPlaying = false;
+    this.tempo = 120;
+    this.page = 0;
+    this.blocks = {};
+    this.blinkers = [];
+    this.children = [];
+    this.steps = {
+      bass: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      kick: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      snare: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      lead: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      fm: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)],
+      hat: [makeStepArray(16), makeStepArray(16), makeStepArray(16), makeStepArray(16)]
+    };
+    this.copyBuffer = { notes: {}, steps: {} };
+    this.step = 0;
+    this.context = audioCtx;
+    this.instruments = {
+      bass: new _synth2.default(audioCtx),
+      kick: new _kick2.default(audioCtx),
+      snare: new _snare2.default(audioCtx),
+      fm: new _fm2.default(audioCtx),
+      lead: new _leadSynth2.default(audioCtx),
+      hat: new _hat2.default(audioCtx)
+    };
+  }
+
+  _createClass(State, [{
+    key: 'push',
+    value: function push(child) {
+      this.children.push(child);
+      return child;
+    }
+  }, {
+    key: 'trigger',
+    value: function trigger(message) {
+      switch (message.type) {
+        case 'get_page':
+          return this.steps[message.instrument][this.page];
+        case 'toggle_swing':
+          return this.swingIsOn = !this.swingIsOn;
+        case 'set_page':
+          this.page = message.page;
+          this.drawScreen();
+          return message.page;
+        case 'copy_page':
+          return this.copyPage();
+        case 'paste_page':
+          return this.pastePage();
+      }
+    }
+  }, {
+    key: 'toggleStep',
+    value: function toggleStep(idx, type, values) {
+      this.steps[type][this.page][idx].step = (this.steps[type][this.page][idx].step + 1) % values;
+    }
+  }, {
+    key: 'togglePlay',
+    value: function togglePlay() {
+      this.isPlaying = !this.isPlaying;
+
+      if (this.isPlaying) {
+        this.noteTime = 0.0;
+        this.startTime = this.context.currentTime + 0.005;
+        this.rhythmIndex = 0;
+        this.previousRhythmIndex = null;
+        this.schedule();
+      } else {
+        this.stop();
+      }
+    }
+  }, {
+    key: 'copyPage',
+    value: function copyPage() {
+      var _this = this;
+
+      Object.keys(this.steps).forEach(function (stepKey) {
+        _this.copyBuffer.steps[stepKey] = _this.steps[stepKey][_this.page].slice().map(function (step) {
+          return Object.assign({}, step);
+        });
+      });
+    }
+  }, {
+    key: 'pastePage',
+    value: function pastePage() {
+      var _this2 = this;
+
+      Object.keys(this.steps).forEach(function (stepKey) {
+        _this2.steps[stepKey][_this2.page] = _this2.copyBuffer.steps[stepKey].slice();
+      });
+      this.refreshScreen();
+    }
+  }, {
+    key: 'schedule',
+    value: function schedule() {
+      var _this3 = this;
+
+      var currentTime = this.context.currentTime;
+      currentTime -= this.startTime;
+
+      while (this.noteTime < currentTime + 0.200) {
+        var contextPlayTime = this.noteTime + this.startTime;
+        this.blinkers[this.rhythmIndex].toggle();
+        if (this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle();
+        /* for each instrument pass the step object for this page and beat into the play method */
+        Object.keys(this.steps).forEach(function (type) {
+          _this3.instruments[type].play(_this3.steps[type][_this3.page][_this3.rhythmIndex]);
+        });
+        this.advanceNote();
+      }
+      this.interval = setTimeout(function () {
+        _this3.schedule();
+      }, 0);
+    }
+  }, {
+    key: 'advanceNote',
+    value: function advanceNote() {
+      var secondsPerBeat = 60 / this.tempo;
+      this.previousRhythmIndex = this.rhythmIndex;
+      this.rhythmIndex++;
+      if (this.rhythmIndex === _constants.LOOP_LENGTH) {
+        this.rhythmIndex = 0;
+      }
+
+      if (this.swingIsOn) {
+        this.noteTime += this.rhythmIndex % 2 ? 0.32 * secondsPerBeat : 0.18 * secondsPerBeat;
+      } else {
+        this.noteTime += 0.25 * secondsPerBeat;
+      }
+    }
+  }, {
+    key: 'stop',
+    value: function stop() {
+      var _this4 = this;
+
+      Object.keys(this.instruments).forEach(function (key) {
+        _this4.instruments[key].stopAll();
+      });
+      this.blinkers[this.previousRhythmIndex].toggle();
+      window.clearInterval(this.interval);
+    }
+  }, {
+    key: 'drawScreen',
+    value: function drawScreen() {
+      this.children.forEach(function (child) {
+        return child.render();
+      });
+    }
+  }]);
+
+  return State;
+}();
+
+exports.default = State;
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BeatMarker = function () {
+  function BeatMarker(ctx, x, y) {
+    _classCallCheck(this, BeatMarker);
+
+    this.context = ctx;
+    this.x = x;
+    this.y = y;
+  }
+
+  _createClass(BeatMarker, [{
+    key: 'render',
+    value: function render() {
+      this.context.fillStyle = 'red';
+      this.context.fillRect(this.x, this.y, 40, 40);
+      this.context.clearRect(this.x, this.y, 30, 30);
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick() {}
+  }]);
+
+  return BeatMarker;
+}();
+
+exports.default = BeatMarker;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Button = function () {
+  function Button(text, ctx, x, y, handleClick) {
+    _classCallCheck(this, Button);
+
+    this.x = x;
+    this.y = y;
+    this.text = text;
+    this.textWidth = Math.ceil(ctx.measureText(text).width);
+    this.width = Math.ceil((this.textWidth + 10) / 40) * 40;
+    this.toggled = false;
+    this.context = ctx;
+    this.callBack = handleClick;
+  }
+
+  _createClass(Button, [{
+    key: 'handleClick',
+    value: function handleClick(x, y) {
+      this.toggled = !this.toggled;
+      this.callBack(this.toggled);
+      this.render();
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      this.context.clearRect(this.x, this.y, this.width, 40);
+      this.context.fillStyle = 'black';
+      this.context.fillRect(this.x, this.y, this.width, 40);
+      if (this.isToggled ? this.isToggled() : this.toggled) {
+        this.context.fillStyle = '#999';
+        this.context.fillRect(this.x + 1, this.y, this.width - 2, 39);
+      } else {
+        this.context.clearRect(this.x + 1, this.y + 1, this.width - 2, 39);
+      }
+      this.context.fillStyle = 'black';
+      var wordMargin = this.width / 2 - this.textWidth / 2;
+      this.context.fillText(this.text, this.x + wordMargin, this.y + 25, this.width + 3);
+    }
+  }]);
+
+  return Button;
+}();
+
+exports.default = Button;
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _synth = __webpack_require__(2);
+
+var _synth2 = _interopRequireDefault(_synth);
+
+var _switch = __webpack_require__(23);
+
+var _Blinker = __webpack_require__(20);
+
+var _Blinker2 = _interopRequireDefault(_Blinker);
+
+var _note = __webpack_require__(22);
+
+var _note2 = _interopRequireDefault(_note);
+
+var _instrumentControlFunctions = __webpack_require__(18);
+
+var _instrumentControlFunctions2 = _interopRequireDefault(_instrumentControlFunctions);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var InstrumentWindow = function () {
+  function InstrumentWindow(state, ctx, x, y) {
+    _classCallCheck(this, InstrumentWindow);
+
+    this.x = x;
+    this.y = y;
+    this.parent = state;
+    this.context = ctx;
+    this.instrument = 'bass';
+    this.instrumentControlMap = {};
+    this.moduleMap = {};
+    this.children = [];
+    this.instrumentControls = [];
+    this.build();
+  }
+
+  _createClass(InstrumentWindow, [{
+    key: 'push',
+    value: function push(child) {
+      this.children.push(child);
+      return child;
+    }
+  }, {
+    key: 'build',
+    value: function build() {
+      for (var i = 0; i < 16; i++) {
+        this.moduleMap[i + '/9'] = this.push(new _note2.default(i, this, this.context, this.x + i * 40, this.y + 9 * 40));
+        this.moduleMap[i + '/10'] = this.push(new _switch.OctaveSwitch(i, this, this.context, this.x + i * 40, this.y + 10 * 40));
+        this.moduleMap[i + '/11'] = this.push(new _Blinker2.default(i, this.parent, this.context, this.x + i * 40, this.y + 11 * 40));
+      }
+      this.buildInstrumentControls();
+    }
+  }, {
+    key: 'buildInstrumentControls',
+    value: function buildInstrumentControls() {
+      _instrumentControlFunctions2.default[this.instrument](this.parent, this.instrumentControls, this.instrumentControlMap, this.context, this.x, this.y);
+    }
+  }, {
+    key: 'trigger',
+    value: function trigger(message) {
+      return this.parent.trigger(message);
+    }
+  }, {
+    key: 'setInstrument',
+    value: function setInstrument(instrument) {
+      this.instrument = instrument;
+      this.instrumentControls = [];
+      this.instrumentControlMap = {};
+      this.build();
+      this.parent.drawScreen();
+    }
+  }, {
+    key: 'getPage',
+    value: function getPage() {
+      return this.trigger({ type: 'get_page', instrument: this.instrument });
+    }
+  }, {
+    key: 'renderChildren',
+    value: function renderChildren() {
+      this.children.forEach(function (child) {
+        return child.render();
+      });
+      this.instrumentControls.forEach(function (child) {
+        return child.render();
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      this.context.fillRect(this.x, this.y, 640, 480);
+      this.context.clearRect(this.x + 1, this.y + 1, 638, 478);
+      this.renderChildren();
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick(x, y, innerX, innerY) {
+      var xCell = x - this.x / 40;
+      var yCell = y - this.y / 40;
+      var key = xCell + '/' + yCell;
+      var module = this.moduleMap[key] || this.instrumentControlMap[key];
+      if (module) module.handleClick(x, y, innerX, innerY);
+    }
+  }]);
+
+  return InstrumentWindow;
+}();
+
+/*
+    0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+0   . . . . . . . . . . .  .  .  .  .  .  .
+1   . . . . . . . . . . .  .  .  .  .  .  .
+2   . . . . . . . . . . .  .  .  .  .  .  .
+3   . . . . . . . . . . .  .  .  .  .  .  .
+4   . . . . . . . . . . .  .  .  .  .  .  .
+5   . . . . . . . . . . .  .  .  .  .  .  .
+6   . . . . . . . . . . .  .  .  .  .  .  .
+7   . . . . . . . . . . .  .  .  .  .  .  .
+8   . . . . . . . . . . .  .  .  .  .  .  .
+9   . . . . . . . . . . .  .  .  .  .  .  .
+10  . . . . . . . . . . .  .  .  .  .  .  .
+11  . . . . . . . . . . .  .  .  .  .  .  .
+*/
+
+
+exports.default = InstrumentWindow;
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Options = function () {
+  function Options(options, callBack, ctx, x, y) {
+    _classCallCheck(this, Options);
+
+    this.context = ctx;
+    this.idx = 0;
+    this.options = options;
+    this.callBack = callBack;
+    this.x = x;
+    this.y = y;
+  }
+
+  _createClass(Options, [{
+    key: 'render',
+    value: function render() {
+      this.context.fillStyle = 'black';
+      this.context.clearRect(this.x, this.y, 40, 40);
+      this.context.fillText(this.options[this.idx], this.x + 3, this.y + 25, 39);
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick() {
+      this.idx = (this.idx + 1) % this.options.length;
+      this.render();
+      this.callBack(this.options[this.idx]);
+    }
+  }]);
+
+  return Options;
+}();
+
+exports.default = Options;
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var PageButton = function () {
+  function PageButton(state, ctx, x, y, handleClick) {
+    _classCallCheck(this, PageButton);
+
+    this.context = ctx;
+    this.state = state;
+    this.pageOne = x / 40;
+    this.x = x;
+    this.y = y;
+    this.value = 0;
+    this.callBack = handleClick;
+  }
+
+  _createClass(PageButton, [{
+    key: 'handleClick',
+    value: function handleClick(x, y) {
+      var buttonIdx = x - this.pageOne;
+      this.value = buttonIdx;
+      this.state.trigger({ type: 'set_page', page: this.value });
+      this.render();
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      this.context.clearRect(this.x, this.y, 40, 160);
+      this.context.fillStyle = 'black';
+      for (var i = 0; i < 4; i++) {
+        var offset = 40 * i;
+        var name = 'Pg ' + (i + 1);
+        this.context.fillRect(this.x + offset, this.y, 40, 40);
+        if (i === this.value) {
+          this.context.fillStyle = '#999';
+          this.context.fillRect(this.x + offset + 1, this.y, 39 - (i === 3 ? 1 : 0), 39);
+        } else {
+          this.context.clearRect(this.x + offset + 1, this.y, 39 - (i === 3 ? 1 : 0), 39);
+        }
+        this.context.fillStyle = 'black';
+        this.context.fillText(name, this.x + offset + 3, this.y + 25, 80);
+      }
+    }
+  }]);
+
+  return PageButton;
+}();
+
+exports.default = PageButton;
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var PlayBtn = function () {
+  function PlayBtn(ctx, state, x, y) {
+    _classCallCheck(this, PlayBtn);
+
+    this.context = ctx;
+    this.state = state;
+    this.x = x;
+    this.y = y;
+    this.on = state.isPlaying;
+  }
+
+  _createClass(PlayBtn, [{
+    key: 'render',
+    value: function render() {
+      this.on = this.state.isPlaying;
+      this.context.fillStyle = this.on ? 'red' : 'green';
+      this.context.fillRect(this.x, this.y, 40, 40);
+      this.context.fillStyle = this.on ? 'black' : 'white';
+      this.context.fillText(this.on ? 'STOP' : 'PLAY', this.x + 1, this.y + 25, 80);
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick() {
+      this.state.togglePlay();
+      this.on = this.state.isPlaying;
+      this.render();
+    }
+  }]);
+
+  return PlayBtn;
+}();
+
+exports.default = PlayBtn;
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var PlayBtn = function () {
+  function PlayBtn(state, ctx, x, y) {
+    _classCallCheck(this, PlayBtn);
+
+    this.context = ctx;
+    this.state = state;
+    this.x = x;
+    this.y = y;
+  }
+
+  _createClass(PlayBtn, [{
+    key: 'render',
+    value: function render() {
+      var tempoText = this.state.tempo + '/bpms';
+      this.context.fillStyle = 'black';
+      this.context.clearRect(this.x, this.y, 65, 40);
+      this.context.fillText('+', this.x + 25, this.y + 10, 80);
+      this.context.fillText('-', this.x + 26, this.y + 40, 80);
+      this.context.fillText(tempoText, this.x, this.y + 25, 80);
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick(x, y, innerX, innerY) {
+      var section = Math.floor(innerY / 20);
+      this.state.tempo = section ? this.state.tempo - 1 : this.state.tempo + 1;
+      this.render();
+    }
+  }]);
+
+  return PlayBtn;
+}();
+
+exports.default = PlayBtn;
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Word = function () {
+  function Word(word, ctx, x, y, handleClick) {
+    _classCallCheck(this, Word);
+
+    this.context = ctx;
+    this.word = word;
+    this.x = x;
+    this.y = y;
+    this.handleClick = handleClick || function () {};
+  }
+
+  _createClass(Word, [{
+    key: 'render',
+    value: function render() {
+      this.context.clearRect(this.x, this.y, 40, 40);
+      this.context.fillStyle = 'green';
+      this.context.fillText(this.word, this.x + 3, this.y + 25, 80);
+    }
+  }]);
+
+  return Word;
+}();
+
+exports.default = Word;
+
 /***/ }),
 /* 18 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -1636,43 +1698,73 @@ function noiseBuffer(context) {
 "use strict";
 
 
-var _state = __webpack_require__(3);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _synth = __webpack_require__(2);
+
+var _leadSynth = __webpack_require__(7);
+
+var _fm = __webpack_require__(4);
+
+var _kick = __webpack_require__(6);
+
+var _hat = __webpack_require__(5);
+
+var _snare = __webpack_require__(8);
+
+var map = {
+  'bass': _synth.bassControlFunction,
+  'lead': _leadSynth.leadControlFunction,
+  'fm': _fm.fmControlFunction,
+  'kick': _kick.kickControlFunction,
+  'hat': _hat.hatControlFunction,
+  'snare': _snare.snareControlFunction
+};
+
+exports.default = map;
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _state = __webpack_require__(9);
 
 var _state2 = _interopRequireDefault(_state);
 
-var _PlayBtn = __webpack_require__(9);
+var _PlayBtn = __webpack_require__(15);
 
 var _PlayBtn2 = _interopRequireDefault(_PlayBtn);
 
-var _BeatMarker = __webpack_require__(4);
+var _BeatMarker = __webpack_require__(10);
 
 var _BeatMarker2 = _interopRequireDefault(_BeatMarker);
 
-var _Word = __webpack_require__(12);
+var _Word = __webpack_require__(17);
 
 var _Word2 = _interopRequireDefault(_Word);
 
-var _Options = __webpack_require__(7);
+var _Options = __webpack_require__(13);
 
 var _Options2 = _interopRequireDefault(_Options);
 
-var _PageButton = __webpack_require__(8);
+var _PageButton = __webpack_require__(14);
 
 var _PageButton2 = _interopRequireDefault(_PageButton);
 
-var _Tempo = __webpack_require__(10);
+var _Tempo = __webpack_require__(16);
 
 var _Tempo2 = _interopRequireDefault(_Tempo);
 
-var _Volume = __webpack_require__(11);
-
-var _Volume2 = _interopRequireDefault(_Volume);
-
-var _Button = __webpack_require__(5);
+var _Button = __webpack_require__(11);
 
 var _Button2 = _interopRequireDefault(_Button);
 
-var _InstrumentWindow = __webpack_require__(6);
+var _InstrumentWindow = __webpack_require__(12);
 
 var _InstrumentWindow2 = _interopRequireDefault(_InstrumentWindow);
 
@@ -1722,7 +1814,7 @@ state.blocks['11/0'] = tempo;
 state.blocks['12/0'] = tempo;
 
 var toggleSwing = function toggleSwing() {
-  return state.message({ type: 'toggle_swing' });
+  return state.trigger({ type: 'toggle_swing' });
 };
 state.blocks['14/0'] = state.push(new _Options2.default(['straight', 'swing'], toggleSwing, ctx, 14 * 40, 0));
 
@@ -1835,7 +1927,7 @@ window.onkeydown = function (e) {
 state.drawScreen();
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1850,12 +1942,14 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Blinker = function () {
-  function Blinker(i, state, ctx) {
+  function Blinker(i, state, ctx, x, y) {
     _classCallCheck(this, Blinker);
 
     this.context = ctx;
     state.blinkers[i] = this;
     this.idx = i;
+    this.x = x;
+    this.y = y;
   }
 
   _createClass(Blinker, [{
@@ -1879,12 +1973,6 @@ var Blinker = function () {
       this.context.stroke();
     }
   }, {
-    key: 'setPos',
-    value: function setPos(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-  }, {
     key: 'handleClick',
     value: function handleClick() {}
   }, {
@@ -1901,7 +1989,66 @@ var Blinker = function () {
 exports.default = Blinker;
 
 /***/ }),
-/* 20 */
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ValueInput = function () {
+  function ValueInput(_ref) {
+    var ctx = _ref.ctx,
+        x = _ref.x,
+        y = _ref.y,
+        initialValue = _ref.initialValue,
+        maxValue = _ref.maxValue,
+        cb = _ref.cb;
+
+    _classCallCheck(this, ValueInput);
+
+    this.context = ctx;
+    this.value = initialValue;
+    this.maxValue = maxValue;
+    this.x = x;
+    this.y = y;
+    this.callback = cb;
+  }
+
+  _createClass(ValueInput, [{
+    key: 'render',
+    value: function render() {
+      this.context.fillStyle = 'black';
+      this.context.fillRect(this.x, this.y, 40, 40);
+      this.context.clearRect(this.x + 1, this.y + 1, 38, 38);
+      this.context.fillText('+', this.x + 20, this.y + 13, 40);
+      this.context.fillText('-', this.x + 21, this.y + 37, 40);
+      this.context.fillText(this.value, this.x + 5, this.y + 25, 40);
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick(x, y, innerX, innerY) {
+      var section = Math.floor(innerY / 20);
+      this.value = Math.abs((section ? this.value - 1 : this.value + 1) % this.maxValue);
+      this.callback(this.value);
+      this.render();
+    }
+  }]);
+
+  return ValueInput;
+}();
+
+exports.default = ValueInput;
+
+/***/ }),
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1916,21 +2063,17 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Note = function () {
-  function Note(idx, parent, context) {
+  function Note(idx, parent, context, x, y) {
     _classCallCheck(this, Note);
 
     this.notes = ['c', 'c#', 'd', 'd#', 'e', 'f', 'f#', 'g', 'g#', 'a', 'a#', 'b'], this.parent = parent;
     this.context = context;
     this.idx = idx;
+    this.x = x;
+    this.y = y;
   }
 
   _createClass(Note, [{
-    key: 'setPos',
-    value: function setPos(x, y) {
-      this.x = x;
-      this.y = y;
-    }
-  }, {
     key: 'render',
     value: function render() {
       this.context.fillStyle = 'black';
@@ -1955,7 +2098,7 @@ var Note = function () {
 exports.default = Note;
 
 /***/ }),
-/* 21 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1968,7 +2111,7 @@ exports.OctaveSwitch = exports.BinSwitch = undefined;
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _constants = __webpack_require__(1);
+var _constants = __webpack_require__(3);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -2015,14 +2158,14 @@ var BinSwitch = exports.BinSwitch = function () {
 }();
 
 var OctaveSwitch = exports.OctaveSwitch = function () {
-  function OctaveSwitch(idx, state, ctx) {
+  function OctaveSwitch(idx, state, ctx, x, y) {
     _classCallCheck(this, OctaveSwitch);
 
     this.idx = idx;
     this.state = state;
     this.context = ctx;
-    this.x = null;
-    this.y = null;
+    this.x = x;
+    this.y = y;
     this.colors = ['black', 'red', 'blue'];
   }
 
@@ -2035,12 +2178,6 @@ var OctaveSwitch = exports.OctaveSwitch = function () {
       this.context.fillStyle = page[this.idx].hold ? 'green' : 'yellow';
       this.context.fillRect(this.x, this.y, 10, 10);
       this.context.fillStyle = _constants.COLOR;
-    }
-  }, {
-    key: 'setPos',
-    value: function setPos(x, y) {
-      this.x = x;
-      this.y = y;
     }
   }, {
     key: 'handleClick',

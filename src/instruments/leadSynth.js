@@ -1,4 +1,5 @@
 import Listener from './Listener'
+import Control from '../ui/InstrumentControl'
 
 export default class LeadSynth extends Listener {
   constructor(ctx){
@@ -61,4 +62,8 @@ export default class LeadSynth extends Listener {
     }
 
   }
+}
+
+export const leadControlFunction = (moduleMap) => {
+
 }

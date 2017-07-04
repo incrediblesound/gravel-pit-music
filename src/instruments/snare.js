@@ -1,4 +1,5 @@
 import Listener from './Listener'
+import Control from '../ui/InstrumentControl'
 
 export default class Snare extends Listener {
   constructor(ctx){
@@ -64,3 +65,7 @@ function noiseBuffer(context) {
   }
   return buffer;
 };
+
+export const snareControlFunction = (moduleMap) => {
+
+}

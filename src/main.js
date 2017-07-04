@@ -5,7 +5,6 @@ import Word from './ui/Word'
 import Options from './ui/Options'
 import PageButton from './ui/PageButton'
 import Tempo from './ui/Tempo'
-import Volume from './ui/Volume'
 import Button from './ui/Button'
 import InstrumentWindow from './ui/InstrumentWindow'
 

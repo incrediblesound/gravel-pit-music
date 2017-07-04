@@ -1,8 +1,10 @@
 export default class Blinker {
-  constructor(i, state, ctx){
+  constructor(i, state, ctx, x, y){
     this.context = ctx
     state.blinkers[i] = this
     this.idx = i
+    this.x = x
+    this.y = y
   }
   render(){
     if(this.on || this.idx % 4 === 0){
@@ -19,10 +21,6 @@ export default class Blinker {
     this.context.lineWidth = 1;
     this.context.strokeStyle = '#003300';
     this.context.stroke();
-  }
-  setPos(x, y){
-    this.x = x
-    this.y = y
   }
   handleClick(){}
   toggle(){

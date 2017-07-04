@@ -1,4 +1,5 @@
 import Listener from './Listener'
+import Control from '../ui/InstrumentControl'
 
 export default class KickSynth extends Listener {
   constructor(ctx){
@@ -40,4 +41,8 @@ export default class KickSynth extends Listener {
       blipOsc.stop(this.context.currentTime+1)
     }
   }
+}
+
+export const kickControlFunction = (moduleMap) => {
+
 }

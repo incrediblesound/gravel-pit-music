@@ -1,4 +1,5 @@
 import Listener from './Listener'
+import Control from '../ui/InstrumentControl'
 
 export default class KeySynth extends Listener {
   constructor(ctx){
@@ -7,7 +8,7 @@ export default class KeySynth extends Listener {
     this.volume = 8
     this.context = ctx
     this.oscillators = {}
-    this.filterValue = 0
+    this.filterValue = 1
     this.playing = false
   }
   stopAll(){
@@ -78,4 +79,15 @@ export default class KeySynth extends Listener {
       this.stopAll()
     }
   }
+}
+
+export const bassControlFunction = (state, modules, moduleMap, ctx, x, y) => {
+  const volume = new Control(ctx, x, y, 'Volume', 8, 10, (value) => {
+      state.instruments.bass.setProp({ property: 'volume', value })
+  })
+  modules.push(volume)
+  moduleMap['0/0'] = volume
+  moduleMap['1/0'] = volume
+  moduleMap['2/0'] = volume
+
 }

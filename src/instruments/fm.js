@@ -1,4 +1,6 @@
 import Listener from './Listener'
+import Control from '../ui/InstrumentControl'
+
 export default class fmSynth extends Listener {
   constructor(ctx){
     super()
@@ -112,4 +114,8 @@ export default class fmSynth extends Listener {
       this.stopAll()
     }
   }
+}
+
+export const fmControlFunction = (moduleMap) => {
+
 }
