@@ -1,6 +1,6 @@
-import KeySynth from './instruments/synth'
 import KickSynth from './instruments/kick'
 import LeadSynth from './instruments/leadSynth'
+import BassSynth from './instruments/synth'
 import fm from './instruments/fm'
 import Snare from './instruments/snare'
 import Hat from './instruments/hat'
@@ -21,7 +21,8 @@ export default class State {
     this.tempo = 120
     this.page = 0
     this.blocks = {}
-    this.moduleMap = {}
+    this.blinkers = []
+    this.children = []
     this.steps = {
       bass: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
       kick: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)],
@@ -31,11 +32,10 @@ export default class State {
       hat: [makeStepArray(16),makeStepArray(16), makeStepArray(16), makeStepArray(16)]
     }
     this.copyBuffer = { notes: {}, steps: {} }
-    this.blinkers = []
     this.step = 0
     this.context = audioCtx
     this.instruments = {
-      bass: new KeySynth(audioCtx),
+      bass: new BassSynth(audioCtx),
       kick: new KickSynth(audioCtx),
       snare: new Snare(audioCtx),
       fm: new fm(audioCtx),
@@ -43,13 +43,21 @@ export default class State {
       hat: new Hat(audioCtx)
     }
   }
-  toggleSwing(idx){
-    this.swingIsOn = !this.swingIsOn
+  push(child){
+    this.children.push(child)
+    return child
   }
-  setPage(value){
-    this.page = value
-    this.refreshScreen()
-    return value
+  trigger(message){
+    switch (message.type) {
+      case 'get_page': return this.steps[message.instrument][this.page]
+      case 'toggle_swing': return this.swingIsOn = !this.swingIsOn
+      case 'set_page':
+        this.page = message.page
+        this.drawScreen()
+        return message.page
+      case 'copy_page': return this.copyPage()
+      case 'paste_page': return this.pastePage()
+    }
   }
   toggleStep(idx, type, values){
     this.steps[type][this.page][idx].step = (this.steps[type][this.page][idx].step + 1) % values
@@ -80,13 +88,13 @@ export default class State {
   }
   schedule(){
     let currentTime = this.context.currentTime
-    // The sequence starts at startTime, so normalize currentTime so that it's 0 at the start of the sequence.
     currentTime -= this.startTime
 
     while (this.noteTime < currentTime + 0.200) {
       var contextPlayTime = this.noteTime + this.startTime
       this.blinkers[this.rhythmIndex].toggle()
-      if(this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle()
+      if(this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle(false)
+      /* for each instrument pass the step object for this page and beat into the play method */
       Object.keys(this.steps).forEach(type => {
         this.instruments[type].play(this.steps[type][this.page][this.rhythmIndex])
       })
@@ -115,25 +123,7 @@ export default class State {
     this.blinkers[this.previousRhythmIndex].toggle()
     window.clearInterval(this.interval)
   }
-  initScreen(){
-    for(var i = 0; i < 1020; i += 40){
-      for(var k = 0; k < 680; k += 40){
-        const key = `${i/40}/${k/40}`
-        const module = this.moduleMap[key]
-        if(module){
-          module.setPos(i, k)
-          this.blocks[key] = module
-        }
-        if(this.blocks[key]) this.blocks[key].render()
-      }
-    }
-  }
-  refreshScreen(){
-    for(var i = 0; i < 1020; i += 40){
-      for(var k = 0; k < 680; k += 40){
-        const key = `${i/40}/${k/40}`
-        if(this.blocks[key]) this.blocks[key].render()
-      }
-    }
+  drawScreen(){
+    this.children.forEach(child => child.render())
   }
 }

@@ -11,10 +11,11 @@ export default class PageButton {
   handleClick(x, y){
     const buttonIdx = x - this.pageOne
     this.value = buttonIdx
-    this.state.setPage(this.value)
+    this.state.trigger({ type: 'set_page', page: this.value })
     this.render()
   }
   render(){
+    this.value = this.state.page // reset page btn to top level page value
     this.context.clearRect(this.x, this.y, 40, 160)
     this.context.fillStyle = 'black'
     for(let i = 0; i < 4; i++){
@@ -23,9 +24,9 @@ export default class PageButton {
       this.context.fillRect(this.x+offset, this.y, 40, 40)
       if(i === this.value){
         this.context.fillStyle = '#999'
-        this.context.fillRect(this.x+offset, this.y, 39, 39)
+        this.context.fillRect(this.x+offset+1, this.y, 39-(i === 3 ? 1 : 0), 39)
       } else {
-        this.context.clearRect(this.x+offset, this.y, 39, 39)
+        this.context.clearRect(this.x+offset+1, this.y, 39-(i === 3 ? 1 : 0), 39)
       }
       this.context.fillStyle = 'black'
       this.context.fillText(name, this.x+offset+3, this.y+25, 80);

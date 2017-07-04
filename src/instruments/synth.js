@@ -1,12 +1,14 @@
 import Listener from './Listener'
+import ControlValue from '../ui/InstrumentControlValue'
 
 export default class KeySynth extends Listener {
   constructor(ctx){
     super()
+    this.name = 'bass'
     this.volume = 8
     this.context = ctx
     this.oscillators = {}
-    this.filterValue = 0
+    this.filterValue = 1
     this.playing = false
   }
   stopAll(){
@@ -77,4 +79,25 @@ export default class KeySynth extends Listener {
       this.stopAll()
     }
   }
+}
+
+export const bassControlFunction = (state, modules, moduleMap, ctx, x, y) => {
+  const initialVolume = state.instruments.bass.volume
+  const volume = new ControlValue(ctx, x, y, 'Volume', initialVolume, 10, (value) => {
+      state.instruments.bass.setProp({ property: 'volume', value })
+  })
+  modules.push(volume)
+  moduleMap['0/0'] = volume
+  moduleMap['1/0'] = volume
+  moduleMap['2/0'] = volume
+
+  const initialFilter = state.instruments.bass.filterValue
+  const filter = new ControlValue(ctx, x+3*40, y, 'Filter', initialFilter, 10, (value) => {
+      state.instruments.bass.setProp({ property: 'filterValue', value })
+  })
+  modules.push(filter)
+  moduleMap['3/0'] = filter
+  moduleMap['4/0'] = filter
+  moduleMap['5/0'] = filter
+
 }

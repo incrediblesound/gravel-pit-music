@@ -1,4 +1,5 @@
 import Listener from './Listener'
+import ControlValue from '../ui/InstrumentControlValue'
 
 export default class Snare extends Listener {
   constructor(ctx){
@@ -64,3 +65,14 @@ function noiseBuffer(context) {
   }
   return buffer;
 };
+
+export const snareControlFunction = (state, modules, moduleMap, ctx, x, y) => {
+  const initialVolume = state.instruments.snare.volume
+  const volume = new ControlValue(ctx, x, y, 'Volume', initialVolume, 10, (value) => {
+      state.instruments.snare.setProp({ property: 'volume', value })
+  })
+  modules.push(volume)
+  moduleMap['0/0'] = volume
+  moduleMap['1/0'] = volume
+  moduleMap['2/0'] = volume
+}
