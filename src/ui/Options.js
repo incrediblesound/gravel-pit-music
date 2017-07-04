@@ -1,9 +1,9 @@
 export default class Options {
-  constructor(options, callBack, ctx, x, y){
+  constructor({ options, currentValue, cb, ctx, x, y }){
     this.context = ctx
-    this.idx = 0
+    this.idx = currentValue !== undefined ? options.indexOf(currentValue) : 0
     this.options = options
-    this.callBack = callBack
+    this.callBack = cb
     this.x = x
     this.y = y
   }
