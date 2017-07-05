@@ -11,6 +11,8 @@ export default class fmSynth extends Listener {
   constructor(ctx){
     super()
     this.volume = 8
+    this.mod1Oct = 0
+    this.mod2Oct = 0
     this.context = ctx
     this.decay = 1
     this.prevOsc = null
@@ -76,8 +78,8 @@ export default class fmSynth extends Listener {
     const [ osc2, filter2, gainNode2 ] = this.getOscillator('right')
     const [ modulatorA, modulatorGainA ] = this.getModulator(10, 'sawtooth', 70)
     const [ modulatorB, modulatorGainB ] = this.getModulator(10, 'sine', 90)
-    const [ modulator1, modulatorGain1 ] = this.getModulator(50, 'sawtooth', 50)
-    const [ modulator2, modulatorGain2 ] = this.getModulator(100, 'square', 30)
+    const [ modulator1, modulatorGain1 ] = this.getModulator(5.5*(this.mod1Oct*5), 'sawtooth', 50)
+    const [ modulator2, modulatorGain2 ] = this.getModulator(5.5*(this.mod2Oct*10), 'sine', 40)
     modulatorGainA.connect(modulator1.frequency)
     modulatorGainB.connect(modulator2.frequency)
     modulatorGain1.connect(osc1.frequency)
@@ -95,8 +97,8 @@ export default class fmSynth extends Listener {
     const [ osc2, filter2, gainNode2 ] = this.getOscillator()
     const [ modulatorA, modulatorGainA ] = this.getModulator(50, 'square', 35)
     const [ modulatorB, modulatorGainB ] = this.getModulator(10, 'sine', 50)
-    const [ modulator1, modulatorGain1 ] = this.getModulator(5, 'sine', 30)
-    const [ modulator2, modulatorGain2 ] = this.getModulator(50, 'square', 25)
+    const [ modulator1, modulatorGain1 ] = this.getModulator(5.5*(this.mod1Oct*5), 'sine', 30)
+    const [ modulator2, modulatorGain2 ] = this.getModulator(5.5*(this.mod2Oct*10), 'sine', 35)
     modulatorGainA.connect(modulator1.frequency)
     modulatorGain1.connect(modulatorB.frequency)
     modulatorGainB.connect(osc1.frequency)
@@ -189,4 +191,22 @@ export const fmControlFunction = (state, modules, moduleMap, ctx, x, y) => {
   moduleMap['4/1'] = fmMode
   moduleMap['5/1'] = fmMode
   moduleMap['6/1'] = fmMode
+
+  const initialMod1Oct = state.instruments.fm.mod1Oct
+  const mod1Oct = new ControlValue(ctx, x+7*40, y, 'Mod1 Oct', initialMod1Oct, 5, (value) => {
+      state.instruments.fm.setProp({ property: 'mod1Oct', value })
+  })
+  modules.push(mod1Oct)
+  moduleMap['7/0'] = mod1Oct
+  moduleMap['8/0'] = mod1Oct
+  moduleMap['9/0'] = mod1Oct
+
+  const initialMod2Oct = state.instruments.fm.mod2Oct
+  const mod2Oct = new ControlValue(ctx, x+7*40, y+40, 'Mod2 Oct', initialMod2Oct, 5, (value) => {
+      state.instruments.fm.setProp({ property: 'mod2Oct', value })
+  })
+  modules.push(mod2Oct)
+  moduleMap['7/1'] = mod2Oct
+  moduleMap['8/1'] = mod2Oct
+  moduleMap['9/1'] = mod2Oct
 }
