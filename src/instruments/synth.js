@@ -1,5 +1,6 @@
 import Listener from './Listener'
 import ControlValue from '../ui/InstrumentControlValue'
+import ControlOptions from '../ui/InstrumentControlOptions'
 
 export default class KeySynth extends Listener {
   constructor(ctx){
@@ -9,6 +10,7 @@ export default class KeySynth extends Listener {
     this.context = ctx
     this.oscillators = {}
     this.filterValue = 1
+    this.waveform = 'sawtooth'
     this.playing = false
   }
   stopAll(){
@@ -29,16 +31,16 @@ export default class KeySynth extends Listener {
   }
   getOscillators(note, oct){
     const osc1 = this.makeOscillator('triangle')
-    const osc2 = this.makeOscillator('sawtooth')
-    const osc3 = this.makeOscillator('sawtooth')
+    const osc2 = this.makeOscillator(this.waveform)
+    const osc3 = this.makeOscillator(this.waveform)
     const gain = [
       this.context.createGain(), this.context.createGain(), this.context.createGain()
     ]
     const filters = [
       this.context.createBiquadFilter(), this.context.createBiquadFilter()
     ]
-    filters[0].frequency.value = this.filterValue * 1000
-    filters[1].frequency.value = this.filterValue * 1000
+    filters[0].frequency.value = this.filterValue * 500
+    filters[1].frequency.value = this.filterValue * 500
 
     osc1.connect(gain[0])
     osc2.connect(filters[0])
@@ -92,12 +94,23 @@ export const bassControlFunction = (state, modules, moduleMap, ctx, x, y) => {
   moduleMap['2/0'] = volume
 
   const initialFilter = state.instruments.bass.filterValue
-  const filter = new ControlValue(ctx, x+3*40, y, 'Filter', initialFilter, 10, (value) => {
+  const filter = new ControlValue(ctx, x+3*40, y, 'Filter', initialFilter, 20, (value) => {
       state.instruments.bass.setProp({ property: 'filterValue', value })
   })
   modules.push(filter)
   moduleMap['3/0'] = filter
   moduleMap['4/0'] = filter
   moduleMap['5/0'] = filter
+
+  const waveform = new ControlOptions(ctx, x+7*40, y, 'Waveform', ['triangle', 'square','sawtooth'],
+  state.instruments.bass.waveform,
+  (value) => {
+    state.instruments.bass.setProp({ property: 'waveform', value })
+  })
+  modules.push(waveform)
+  moduleMap['7/0'] = waveform
+  moduleMap['8/0'] = waveform
+  moduleMap['9/0'] = waveform
+  moduleMap['10/0'] = waveform
 
 }

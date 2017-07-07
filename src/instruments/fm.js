@@ -76,8 +76,8 @@ export default class fmSynth extends Listener {
   setupOscillators_A(){
     const [ osc1, filter1, gainNode1 ] = this.getOscillator('left')
     const [ osc2, filter2, gainNode2 ] = this.getOscillator('right')
-    const [ modulatorA, modulatorGainA ] = this.getModulator(10, 'sawtooth', 70)
-    const [ modulatorB, modulatorGainB ] = this.getModulator(10, 'sine', 90)
+    const [ modulatorA, modulatorGainA ] = this.getModulator(5.5*(this.mod1Oct*5), 'sawtooth', 70)
+    const [ modulatorB, modulatorGainB ] = this.getModulator(5.5*(this.mod2Oct*10), 'sine', 90)
     const [ modulator1, modulatorGain1 ] = this.getModulator(5.5*(this.mod1Oct*5), 'sawtooth', 50)
     const [ modulator2, modulatorGain2 ] = this.getModulator(5.5*(this.mod2Oct*10), 'sine', 40)
     modulatorGainA.connect(modulator1.frequency)
@@ -95,8 +95,8 @@ export default class fmSynth extends Listener {
   setupOscillators_B(){
     const [ osc1, filter1, gainNode1 ] = this.getOscillator()
     const [ osc2, filter2, gainNode2 ] = this.getOscillator()
-    const [ modulatorA, modulatorGainA ] = this.getModulator(50, 'square', 35)
-    const [ modulatorB, modulatorGainB ] = this.getModulator(10, 'sine', 50)
+    const [ modulatorA, modulatorGainA ] = this.getModulator(5.5*(this.mod1Oct*5), 'square', 35)
+    const [ modulatorB, modulatorGainB ] = this.getModulator(5.5*(this.mod2Oct*10), 'sine', 50)
     const [ modulator1, modulatorGain1 ] = this.getModulator(5.5*(this.mod1Oct*5), 'sine', 30)
     const [ modulator2, modulatorGain2 ] = this.getModulator(5.5*(this.mod2Oct*10), 'sine', 35)
     modulatorGainA.connect(modulator1.frequency)
