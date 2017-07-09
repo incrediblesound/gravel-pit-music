@@ -96,10 +96,14 @@ window.onkeydown = function(e){
       const page = parseInt(e.code.split('Digit')[1]) - 1
       state.trigger({ type: 'set_page', page })
     } else if(e.code === 'BracketLeft' || e.code === 'BracketRight'){
-      const instrumentIdx = instruments.indexOf(instrumentWindow.instrument)
-      let nextInstrumentIdx = e.code === 'BracketLeft' ? instrumentIdx -1 : instrumentIdx + 1
-      nextInstrumentIdx = nextInstrumentIdx % instruments.length
-      instrumentWindow.setInstrument(instruments[nextInstrumentIdx])
+      let instrumentIdx = instruments.indexOf(instrumentWindow.instrument)
+      if(e.code === 'BracketLeft' && instrumentIdx > 0) instrumentIdx -= 1
+      if(e.code === 'BracketRight' && instrumentIdx < instruments.length-1) instrumentIdx += 1
+      instrumentWindow.setInstrument(instruments[instrumentIdx])
+    } else if(e.code === 'KeyC'){
+      state.trigger({ type: 'copy_page'})
+    } else if(e.code === 'KeyV'){
+      state.trigger({ type: 'paste_page'})
     }
   }
 }

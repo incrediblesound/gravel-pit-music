@@ -30,7 +30,13 @@ export default class InstrumentWindow {
     this.buildInstrumentControls()
   }
   buildInstrumentControls(){
-    instrumentControlFunctions[this.instrument](this.parent, this.instrumentControls, this.instrumentControlMap, this.context, this.x+10, this.y+10)
+    instrumentControlFunctions[this.instrument](
+      this.parent,
+      this.instrumentControls,
+      this.instrumentControlMap,
+      this.context,
+      this.x, this.y
+    )
   }
   trigger(message){
     return this.parent.trigger(message)

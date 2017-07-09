@@ -84,7 +84,7 @@ export default class State {
     Object.keys(this.steps).forEach(stepKey => {
       this.steps[stepKey][this.page] = this.copyBuffer.steps[stepKey].slice()
     })
-    this.refreshScreen()
+    this.drawScreen()
   }
   schedule(){
     let currentTime = this.context.currentTime
