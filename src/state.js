@@ -66,13 +66,15 @@ export default class State {
     this.isPlaying = !this.isPlaying
 
     if(this.isPlaying){
-      this.noteTime = 0.0
-      this.startTime = this.context.currentTime + 0.005
-      this.rhythmIndex = 0
-      this.previousRhythmIndex = null
-      this.schedule()
+      this.context.resume().then(() => {
+        this.noteTime = 0.0
+        this.startTime = this.context.currentTime + 0.005
+        this.rhythmIndex = 0
+        this.previousRhythmIndex = null
+        return this.schedule()
+      })
     } else {
-      this.stop()
+      return this.stop()
     }
   }
   copyPage(){
@@ -89,8 +91,8 @@ export default class State {
   schedule(){
     let currentTime = this.context.currentTime
     currentTime -= this.startTime
-
-    while (this.noteTime < currentTime + 0.200) {
+    const nextTime = currentTime + 0.200
+    while (this.noteTime < nextTime) {
       var contextPlayTime = this.noteTime + this.startTime
       this.blinkers[this.rhythmIndex].toggle()
       if(this.previousRhythmIndex !== null) this.blinkers[this.previousRhythmIndex].toggle(false)
@@ -122,6 +124,7 @@ export default class State {
     })
     this.blinkers[this.previousRhythmIndex].toggle()
     window.clearInterval(this.interval)
+    this.context.suspend()
   }
   drawScreen(){
     this.children.forEach(child => child.render())

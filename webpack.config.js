@@ -8,13 +8,11 @@ module.exports = {
         filename: 'main.bundle.js'
     },
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.js$/,
-                loader: 'babel-loader',
-                query: {
-                    presets: ['es2015']
-                }
+                use: 'babel-loader',
+                exclude: /node_modules/,
             }
         ]
     },
