@@ -7,6 +7,7 @@ import PageButton from './ui/PageButton'
 import Tempo from './ui/Tempo'
 import Button from './ui/Button'
 import InstrumentWindow from './ui/InstrumentWindow'
+import SequenceList from './ui/SequenceList'
 
 const canvas = document.getElementById('synth');
 const ctx = canvas.getContext('2d');
@@ -26,6 +27,12 @@ state.blocks['2/0'] = pageButton
 state.blocks['3/0'] = pageButton
 state.blocks['4/0'] = pageButton
 state.blocks['5/0'] = pageButton
+
+const sequenceControl = state.push(new SequenceList(state, ctx, 2*40, 40))
+state.blocks['2/1'] = sequenceControl
+state.blocks['3/1'] = sequenceControl
+state.blocks['4/1'] = sequenceControl
+state.blocks['5/1'] = sequenceControl
 
 state.blocks['7/0'] = state.push(new Word('Copy', ctx, 7*40, 0, () => state.trigger({ type: 'copy_page'})))
 state.blocks['8/0'] = state.push(new Word('Paste', ctx, 8*40, 0, () => state.trigger({ type: 'paste_page'})))
