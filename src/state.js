@@ -121,6 +121,7 @@ export default class State {
       this.rhythmIndex = 0;
       this.sequenceIndex = (this.sequenceIndex + 1) % SEQUENCE_LENGTH
       this.playPage = this.sequence[this.sequenceIndex]
+      this.drawScreen()
     }
     if(this.swingIsOn){
       this.noteTime += this.rhythmIndex % 2 ? 0.32 * secondsPerBeat : 0.18 * secondsPerBeat

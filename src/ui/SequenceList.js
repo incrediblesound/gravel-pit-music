@@ -19,11 +19,17 @@ export default class SequenceList {
     this.context.fillStyle = 'black'
     for(let i = 0; i < 4; i++){
       const offset = 40 * i
-      const name = `[ ${this.value[i]+1} ]`
+      const name = `${this.value[i]+1}`
       this.context.fillRect(this.x+offset, this.y, 40, 40)
       this.context.clearRect(this.x+offset+1, this.y, 39-(i === 3 ? 1 : 0), 39)
+      if (this.state.sequenceIndex === i) {
+        this.context.beginPath();
+        this.context.arc(this.x+(40*i)+6, this.y+6, 4, 0, 2 * Math.PI, false);
+        this.context.fillStyle = 'blue'
+        this.context.fill();
+      }
       this.context.fillStyle = 'black'
-      this.context.fillText(name, this.x+offset+3, this.y+25, 80);
+      this.context.fillText(name, this.x+offset+17, this.y+25, 80);
     }
   }
 }
