@@ -36,7 +36,7 @@ export default class LeadSynth extends Listener {
     osc.type = this.waveform[idx]
 
     const gainNode = this.context.createGain()
-    gainNode.gain.value = this.volume*0.1
+    gainNode.gain.value = (this.volume/2)*0.1
 
     const filter = this.context.createBiquadFilter();
     filter.type = this.filterType

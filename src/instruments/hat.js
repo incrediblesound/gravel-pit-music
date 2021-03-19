@@ -5,6 +5,7 @@ export default class Hat extends Listener {
   constructor(ctx){
     super()
     this.volume = 8
+    this.tone = 25
     this.context = ctx
     this.prevOsc = null
     this.buffer = noiseBuffer(ctx)
@@ -14,7 +15,7 @@ export default class Hat extends Listener {
     noise.buffer = this.buffer
     const noiseFilter = this.context.createBiquadFilter();
     noiseFilter.type = 'highpass';
-    noiseFilter.frequency.value = 2500;
+    noiseFilter.frequency.value = this.tone * 100;
     noise.connect(noiseFilter);
 
     const noiseEnvelope = this.context.createGain();
@@ -60,4 +61,13 @@ export const hatControlFunction = (state, modules, moduleMap, ctx, x, y) => {
   moduleMap['0/0'] = volume
   moduleMap['1/0'] = volume
   moduleMap['2/0'] = volume
+
+  const initialTone = state.instruments.hat.tone
+  const tone = new ControlValue(ctx, x+3*40, y, 'Tone', initialTone, 50, (value) => {
+      state.instruments.hat.setProp({ property: 'tone', value })
+  })
+  modules.push(tone)
+  moduleMap['3/0'] = tone
+  moduleMap['4/0'] = tone
+  moduleMap['5/0'] = tone
 }

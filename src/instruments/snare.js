@@ -5,6 +5,7 @@ export default class Snare extends Listener {
   constructor(ctx){
     super()
     this.volume = 8
+    this.decay = 4
     this.context = ctx
     this.config = {
       type: 'triangle'
@@ -48,8 +49,8 @@ export default class Snare extends Listener {
       const [ noise, noiseEnvelope ] = this.getNoise()
       osc.start()
       noise.start()
-      gain.gain.setTargetAtTime(0, this.context.currentTime, 0.04);
-      noiseEnvelope.gain.setTargetAtTime(0, this.context.currentTime, 0.03);
+      gain.gain.setTargetAtTime(0, this.context.currentTime, this.decay * 0.01);
+      noiseEnvelope.gain.setTargetAtTime(0, this.context.currentTime, this.decay * 0.01);
       osc.stop(this.context.currentTime + 0.30)
       noise.stop(this.context.currentTime + 0.30)
     }
@@ -75,4 +76,14 @@ export const snareControlFunction = (state, modules, moduleMap, ctx, x, y) => {
   moduleMap['0/0'] = volume
   moduleMap['1/0'] = volume
   moduleMap['2/0'] = volume
+
+  const initialDecay = state.instruments.snare.decay
+  const decay = new ControlValue(ctx, x+(3*40), y, 'Decay', initialDecay, 10, value => {
+    state.instruments.snare.setProp({ property: 'decay', value })
+  })
+  modules.push(decay)
+  moduleMap['3/0'] = decay
+  moduleMap['4/0'] = decay
+  moduleMap['5/0'] = decay
+
 }
