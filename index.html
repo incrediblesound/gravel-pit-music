@@ -19,12 +19,16 @@
     justify-content: space-between;
     border-bottom: solid 1px #666;
   }
-  .header h3 {
-    /*justify-content: flex-start;*/
-  }
   .header a {
     text-decoration: none;
     color: blue;
+  }
+  .container {
+    display: flex;
+    flex-direction: row;
+  }
+  .tips {
+    margin-left: 80px;
   }
   </style>
   <body>
@@ -32,7 +36,14 @@
       <h3>GRAVEL PIT</h3>
       <a href="https://github.com/incrediblesound/gravel-pit-music">GITHUB</a>
     </div>
-    <canvas id="synth" height="680" width="1000"></canvas>
+    <div class="container">
+      <canvas id="synth" height="680" width="800"></canvas>
+      <div class="tips">
+        <p>spacebar: play/stop</p>
+        <p>c/v: copy/paste current page</p>
+        <p>[/]: rotate through instruments</p>
+      </div>
+    </div>
   </body>
   <script src="./main.bundle.js"></script>
 </html>
